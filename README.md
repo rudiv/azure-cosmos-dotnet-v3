@@ -5,10 +5,11 @@ You know how Go has an azcosmos that kinda like, does what you need and nothing 
 I mean it's not, cos it's the whole SDK that I've bastardised to cut out as much Newtonsoft.Json as possible and make it run in AOT land.
 
 These are tested (in the AotTest project):
-`.GetItemQueryIterator<T>`
-`CreateItemAsync`
-`ReplaceItemAsync`
-`DeleteItemAsync`
+
+- `.GetItemQueryIterator<T>`
+- `CreateItemAsync`
+- `ReplaceItemAsync`
+- `DeleteItemAsync`
 
 So literally everything you need.
 
