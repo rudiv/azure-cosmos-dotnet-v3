@@ -518,6 +518,8 @@ namespace Microsoft.Azure.Cosmos
 
             public override DynamicMetaObject BindConvert(ConvertBinder binder)
             {
+                throw new NotImplementedException();
+                /*
                 Type baseFeedType = typeof(DocumentFeedResponse<bool>).GetGenericTypeDefinition();
 
                 if (binder.Type != typeof(IEnumerable) && (!binder.Type.IsGenericType() || (binder.Type.GetGenericTypeDefinition() != baseFeedType &&
@@ -541,7 +543,7 @@ namespace Microsoft.Azure.Cosmos
                     methodExpression,
                     BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
 
-                return castOperator;
+                return castOperator;*/
             }
         }
     }

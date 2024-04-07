@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// The path to be excluded from indexing.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.Path)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Path)]
         public string Path { get; set; }
 
         /// <summary>

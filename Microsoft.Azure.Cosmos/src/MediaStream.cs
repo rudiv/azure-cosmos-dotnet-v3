@@ -125,6 +125,7 @@ namespace Microsoft.Azure.Cosmos
             this.contentStream.EndWrite(asyncResult);
         }
 
+        [Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
         public override object InitializeLifetimeService()
         {
             return this.contentStream.InitializeLifetimeService();

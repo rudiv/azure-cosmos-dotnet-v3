@@ -11,11 +11,13 @@ namespace Microsoft.Azure.Cosmos.Routing
     using System.Linq;
     using System.Net;
     using System.Runtime.ExceptionServices;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Common;
     using Microsoft.Azure.Cosmos.Core.Trace;
     using Microsoft.Azure.Documents;
+    using STJ;
 
     /// <summary>
     /// AddressCache implementation for client SDK. Supports cross region address routing based on 
@@ -57,7 +59,7 @@ namespace Microsoft.Azure.Cosmos.Routing
 
             this.connectionPolicy.PreferenceChanged += this.OnPreferenceChanged;
 
-#if !(NETSTANDARD15 || NETSTANDARD16)
+#if !(NETSTANDARD15 || NETSTANDARD16) && !NATIVE
 #if NETSTANDARD20
             // GetEntryAssembly returns null when loaded from native netstandard2.0
             if (System.Reflection.Assembly.GetEntryAssembly() != null)
@@ -321,7 +323,7 @@ namespace Microsoft.Azure.Cosmos.Routing
 
                         return;
                     }
-
+                    
                     AccountProperties databaseAccount = await this.GetDatabaseAccountFn(endpoint);
 
                     if (databaseAccount != null)

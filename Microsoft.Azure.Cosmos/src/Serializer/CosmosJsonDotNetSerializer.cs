@@ -7,8 +7,11 @@ namespace Microsoft.Azure.Cosmos
     using System;
     using System.IO;
     using System.Text;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
+    using STJ;
+    using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
     /// <summary>
     /// The default Cosmos JSON.NET serializer.
@@ -16,7 +19,13 @@ namespace Microsoft.Azure.Cosmos
     internal sealed class CosmosJsonDotNetSerializer : CosmosSerializer
     {
         private static readonly Encoding DefaultEncoding = new UTF8Encoding(false, true);
-        private readonly JsonSerializerSettings SerializerSettings;
+
+        private readonly JsonSerializerOptions serializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            TypeInfoResolver = InternalDocumentContext.Default
+        };
 
         /// <summary>
         /// Create a serializer that uses the JSON.net serializer
@@ -27,7 +36,6 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         internal CosmosJsonDotNetSerializer()
         {
-            this.SerializerSettings = null;
         }
 
         /// <summary>
@@ -37,25 +45,13 @@ namespace Microsoft.Azure.Cosmos
         /// This is internal to reduce exposure of JSON.net types so
         /// it is easier to convert to System.Text.Json
         /// </remarks>
+        [Obsolete("You'll need to provide your own STJ", true)]
         internal CosmosJsonDotNetSerializer(CosmosSerializationOptions cosmosSerializerOptions)
         {
             if (cosmosSerializerOptions == null)
             {
-                this.SerializerSettings = null;
                 return;
             }
-
-            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
-            {
-                NullValueHandling = cosmosSerializerOptions.IgnoreNullValues ? NullValueHandling.Ignore : NullValueHandling.Include,
-                Formatting = cosmosSerializerOptions.Indented ? Formatting.Indented : Formatting.None,
-                ContractResolver = cosmosSerializerOptions.PropertyNamingPolicy == CosmosPropertyNamingPolicy.CamelCase
-                    ? new CamelCasePropertyNamesContractResolver()
-                    : null,
-                MaxDepth = 64, // https://github.com/advisories/GHSA-5crp-9r3c-p9vr
-            };
-
-            this.SerializerSettings = jsonSerializerSettings;
         }
 
         /// <summary>
@@ -65,9 +61,9 @@ namespace Microsoft.Azure.Cosmos
         /// This is internal to reduce exposure of JSON.net types so
         /// it is easier to convert to System.Text.Json
         /// </remarks>
+        [Obsolete("You'll need to provide your own STJ", true)]
         internal CosmosJsonDotNetSerializer(JsonSerializerSettings jsonSerializerSettings)
         {
-            this.SerializerSettings = jsonSerializerSettings ?? throw new ArgumentNullException(nameof(jsonSerializerSettings));
         }
 
         /// <summary>
@@ -85,6 +81,13 @@ namespace Microsoft.Azure.Cosmos
                     return (T)(object)stream;
                 }
 
+                using (TextReader tr = new StreamReader(stream, leaveOpen: true))
+                {
+                    stream.Position = 0;
+                }
+
+                return System.Text.Json.JsonSerializer.Deserialize<T>(stream, this.serializerOptions);
+                /*
                 using (StreamReader sr = new StreamReader(stream))
                 {
                     using (JsonTextReader jsonTextReader = new JsonTextReader(sr))
@@ -92,7 +95,7 @@ namespace Microsoft.Azure.Cosmos
                         JsonSerializer jsonSerializer = this.GetSerializer();
                         return jsonSerializer.Deserialize<T>(jsonTextReader);
                     }
-                }
+                }*/
             }
         }
 
@@ -105,6 +108,8 @@ namespace Microsoft.Azure.Cosmos
         public override Stream ToStream<T>(T input)
         {
             MemoryStream streamPayload = new MemoryStream();
+            System.Text.Json.JsonSerializer.Serialize(streamPayload, input, this.serializerOptions);
+            /*
             using (StreamWriter streamWriter = new StreamWriter(streamPayload, encoding: CosmosJsonDotNetSerializer.DefaultEncoding, bufferSize: 1024, leaveOpen: true))
             {
                 using (JsonWriter writer = new JsonTextWriter(streamWriter))
@@ -115,19 +120,10 @@ namespace Microsoft.Azure.Cosmos
                     writer.Flush();
                     streamWriter.Flush();
                 }
-            }
+            }*/
 
             streamPayload.Position = 0;
             return streamPayload;
-        }
-
-        /// <summary>
-        /// JsonSerializer has hit a race conditions with custom settings that cause null reference exception.
-        /// To avoid the race condition a new JsonSerializer is created for each call
-        /// </summary>
-        private JsonSerializer GetSerializer()
-        {
-            return JsonSerializer.Create(this.SerializerSettings);
         }
     }
 }

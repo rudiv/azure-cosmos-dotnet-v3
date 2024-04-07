@@ -16,25 +16,25 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets or sets the path to be encrypted. Must be a top level path, eg. /salary
         /// </summary>
-        [JsonProperty(PropertyName = "path")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "path")]
         public string Path { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier of the Client Encryption Key to be used to encrypt the path.
         /// </summary>
-        [JsonProperty(PropertyName = "clientEncryptionKeyId")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "clientEncryptionKeyId")]
         public string ClientEncryptionKeyId { get; set; }
 
         /// <summary>
         /// Gets or sets the type of encryption to be performed. Eg - Deterministic, Randomized
         /// </summary>
-        [JsonProperty(PropertyName = "encryptionType")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "encryptionType")]
         public string EncryptionType { get; set; }
 
         /// <summary>
         /// Gets or sets the encryption algorithm which will be used. Eg - AEAD_AES_256_CBC_HMAC_SHA256
         /// </summary>
-        [JsonProperty(PropertyName = "encryptionAlgorithm")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "encryptionAlgorithm")]
         public string EncryptionAlgorithm { get; set; }
 
         /// <summary>

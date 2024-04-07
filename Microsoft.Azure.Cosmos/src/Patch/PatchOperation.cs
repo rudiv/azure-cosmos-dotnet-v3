@@ -16,19 +16,19 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Patch operation type.
         /// </summary>
-        [JsonProperty(PropertyName = PatchConstants.PropertyNames.OperationType)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: PatchConstants.PropertyNames.OperationType)]
         public abstract PatchOperationType OperationType { get; }
 
         /// <summary>
         /// Target location reference. 
         /// </summary>
-        [JsonProperty(PropertyName = PatchConstants.PropertyNames.Path)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: PatchConstants.PropertyNames.Path)]
         public abstract string Path { get; }
 
         /// <summary>
         /// Source location reference (used in case of move)
         /// </summary>
-        [JsonProperty(PropertyName = PatchConstants.PropertyNames.From)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: PatchConstants.PropertyNames.From)]
         public virtual string From { get; set; } = null;
 
         /// <summary>

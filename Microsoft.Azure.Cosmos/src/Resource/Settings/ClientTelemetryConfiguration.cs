@@ -11,10 +11,10 @@ namespace Microsoft.Azure.Cosmos
 
     internal class ClientTelemetryConfiguration
     {
-        [JsonProperty(PropertyName = Constants.Properties.ClientTelemetryEnabled)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ClientTelemetryEnabled)]
         public bool IsEnabled { get; set; }
 
-        [JsonProperty(PropertyName = Constants.Properties.ClientTelemetryEndpoint)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ClientTelemetryEndpoint)]
         public string Endpoint { get; set; }
 
         /// <summary>

@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets the x-coordinate of the lower-left corner of the bounding box.
         /// </summary>
-        [JsonProperty(PropertyName = "xmin")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "xmin")]
         public double Xmin
         {
             get; set;
@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets the y-coordinate of the lower-left corner of the bounding box.
         /// </summary>
-        [JsonProperty(PropertyName = "ymin")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "ymin")]
         public double Ymin
         {
             get; set;
@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets the x-coordinate of the upper-right corner of the bounding box.
         /// </summary>
-        [JsonProperty(PropertyName = "xmax")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "xmax")]
         public double Xmax
         {
             get; set;
@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets the y-coordinate of the upper-right corner of the bounding box.
         /// </summary>
-        [JsonProperty(PropertyName = "ymax")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "ymax")]
         public double Ymax
         {
             get; set;

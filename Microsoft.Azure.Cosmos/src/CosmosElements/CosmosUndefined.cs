@@ -14,9 +14,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1600 // Elements should be documented
     public
 #else
-    internal
-#endif
-    sealed class CosmosUndefined : CosmosElement, IEquatable<CosmosUndefined>, IComparable<CosmosUndefined>
+    #endif
+        public sealed class CosmosUndefined : CosmosElement, IEquatable<CosmosUndefined>, IComparable<CosmosUndefined>
     {
         private static readonly CosmosUndefined Instance = new CosmosUndefined();
 
@@ -39,17 +38,17 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return cosmosElementVisitor.Visit(this, input);
         }
 
-        public int CompareTo(CosmosUndefined other)
+        public int CompareTo(CosmosUndefined? other)
         {
             return 0;
         }
 
-        public override bool Equals(CosmosElement cosmosElement)
+        public override bool Equals(CosmosElement? cosmosElement)
         {
             return cosmosElement is CosmosUndefined;
         }
 
-        public bool Equals(CosmosUndefined other)
+        public bool Equals(CosmosUndefined? other)
         {
             return true;
         }

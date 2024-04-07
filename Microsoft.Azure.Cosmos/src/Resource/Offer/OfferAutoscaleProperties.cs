@@ -32,13 +32,15 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// The maximum throughput the autoscale will scale to.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.AutopilotMaxThroughput, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.AutopilotMaxThroughput)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int? MaxThroughput { get; private set; }
 
         /// <summary>
         /// Scales the maximum through put automatically
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.AutopilotAutoUpgradePolicy, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.AutopilotAutoUpgradePolicy)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public OfferAutoscaleAutoUpgradeProperties AutoscaleAutoUpgradeProperties { get; private set; }
 
         /// <summary>

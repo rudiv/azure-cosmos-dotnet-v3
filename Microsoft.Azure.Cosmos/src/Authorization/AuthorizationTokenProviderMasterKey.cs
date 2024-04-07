@@ -29,6 +29,9 @@ namespace Microsoft.Azure.Cosmos
             this.authKeyHashFunction = computeHash ?? throw new ArgumentNullException(nameof(computeHash));
             this.enableAuthFailureTraces = new Lazy<bool>(() =>
             {
+#if NATIVE
+                return false;
+#else
 #if NETSTANDARD20
                 // GetEntryAssembly returns null when loaded from native netstandard2.0
                 if (System.Reflection.Assembly.GetEntryAssembly() == null)
@@ -44,6 +47,7 @@ namespace Microsoft.Azure.Cosmos
                 }
 
                 return enableAuthFailureTracesFlag;
+#endif
             });
         }
 

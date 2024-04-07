@@ -214,7 +214,7 @@ namespace Microsoft.Azure.Cosmos.Routing
                     FeedResource<PartitionKeyRange> feedResource = response.GetResource<FeedResource<PartitionKeyRange>>();
                     if (feedResource != null)
                     {
-                        ranges.AddRange(feedResource);
+                        ranges.AddRange(feedResource.InnerCollection);
                     }
                 }
             }

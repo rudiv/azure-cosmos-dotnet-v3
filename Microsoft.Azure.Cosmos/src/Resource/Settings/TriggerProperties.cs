@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// Gets or sets the body of the trigger for the Azure Cosmos DB service.
         /// </summary>
         /// <value>The body of the trigger.</value>
-        [JsonProperty(PropertyName = Constants.Properties.Body)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Body)]
         public string Body { get; set; }
 
         /// <summary>
@@ -31,8 +31,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// </summary>
         /// <value>The body of the trigger.</value>
         /// <seealso cref="TriggerType"/>
-        [JsonConverter(typeof(StringEnumConverter))]
-        [JsonProperty(PropertyName = Constants.Properties.TriggerType)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.TriggerType)]
         public TriggerType TriggerType { get; set; }
 
         /// <summary>
@@ -40,8 +40,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// </summary>
         /// <value>The operation the trigger is associated with.</value>
         /// <seealso cref="TriggerOperation"/>
-        [JsonConverter(typeof(StringEnumConverter))]
-        [JsonProperty(PropertyName = Constants.Properties.TriggerOperation)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.TriggerOperation)]
         public TriggerOperation TriggerOperation { get; set; }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
         ///  '/', '\\', '?', '#'
         /// </para>
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.Id)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Id)]
         public string Id { get; set; }
 
         /// <summary>
@@ -70,7 +70,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// <remarks>
         /// ETags are used for concurrency checking when updating resources. 
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.ETag, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ETag)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string ETag { get; private set; }
 
         /// <summary>
@@ -81,7 +82,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// A self-link is a static addressable Uri for each resource within a database account and follows the Azure Cosmos DB resource model.
         /// E.g. a self-link for a document could be dbs/db_resourceid/colls/coll_resourceid/documents/doc_resourceid
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.SelfLink, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.SelfLink)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string SelfLink { get; private set; }
 
         /// <summary>

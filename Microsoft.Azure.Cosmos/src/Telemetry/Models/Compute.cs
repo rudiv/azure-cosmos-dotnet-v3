@@ -28,22 +28,22 @@ namespace Microsoft.Azure.Cosmos.Telemetry.Models
             this.VMId = $"{VmMetadataApiHandler.VmIdPrefix}{vMId}";
         }
 
-        [JsonProperty(PropertyName = "location")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "location")]
         internal string Location { get; }
 
-        [JsonProperty(PropertyName = "sku")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "sku")]
         internal string SKU { get; }
 
-        [JsonProperty(PropertyName = "azEnvironment")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "azEnvironment")]
         internal string AzEnvironment { get; }
 
-        [JsonProperty(PropertyName = "osType")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "osType")]
         internal string OSType { get; }
 
-        [JsonProperty(PropertyName = "vmSize")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "vmSize")]
         internal string VMSize { get; }
 
-        [JsonProperty(PropertyName = "vmId")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "vmId")]
         internal string VMId { get; }
     }
 

@@ -41,19 +41,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             this.IndexImpactScore = indexImpactScore;
         }
 
-        [JsonProperty(PropertyName = "FilterExpression")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "FilterExpression")]
         public string FilterExpression { get; }
 
-        [JsonProperty(PropertyName = "IndexSpec")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "IndexSpec")]
         public string IndexDocumentExpression { get; }
 
-        [JsonProperty(PropertyName = "FilterPreciseSet")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "FilterPreciseSet")]
         public bool FilterExpressionPrecision { get; }
 
-        [JsonProperty(PropertyName = "IndexPreciseSet")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "IndexPreciseSet")]
         public bool IndexPlanFullFidelity { get; }
 
-        [JsonProperty(PropertyName = "IndexImpactScore")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "IndexImpactScore")]
         public string IndexImpactScore { get; }
     }
 }

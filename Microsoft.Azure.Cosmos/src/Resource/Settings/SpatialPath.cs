@@ -6,8 +6,8 @@ namespace Microsoft.Azure.Cosmos
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Text.Json.Serialization;
     using Microsoft.Azure.Documents;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Linq;
 
@@ -39,13 +39,14 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Path in JSON document to index
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.Path)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Path)]
         public string Path { get; set; }
 
         /// <summary>
         /// Path's spatial type
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.Types, ItemConverterType = typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Types)]
+        [Newtonsoft.Json.JsonConverter(typeof(JsonStringEnumConverter))]
         public Collection<SpatialType> SpatialTypes
         {
             get
@@ -62,7 +63,8 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets or sets the bounding box
         /// </summary>
-        [JsonProperty(PropertyName = "boundingBox", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "boundingBox")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public BoundingBoxProperties BoundingBox
         {
             get; set;
@@ -72,7 +74,7 @@ namespace Microsoft.Azure.Cosmos
         /// This contains additional values for scenarios where the SDK is not aware of new fields. 
         /// This ensures that if resource is read and updated none of the fields will be lost in the process.
         /// </summary>
-        [JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         internal IDictionary<string, JToken> AdditionalProperties { get; private set; }
     }
 }

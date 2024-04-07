@@ -130,16 +130,7 @@ namespace Microsoft.Azure.Cosmos
                 return propertiesSerializer;
             }
 
-            JsonSerializerSettings settings = new JsonSerializerSettings()
-            {
-                Converters = new List<JsonConverter>()
-                {
-                    new PatchOperationsJsonConverter(cosmosSerializer)
-                },
-                MaxDepth = 64, // https://github.com/advisories/GHSA-5crp-9r3c-p9vr
-            };
-
-            return new CosmosJsonSerializerWrapper(new CosmosJsonDotNetSerializer(settings));
+            return new CosmosJsonSerializerWrapper(new CosmosJsonDotNetSerializer());
         }
     }
 }

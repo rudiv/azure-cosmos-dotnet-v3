@@ -51,8 +51,8 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// One of the values of the <see cref="T:Microsoft.Azure.Documents.GeospatialType"/> enumeration.
         /// </value>
-        [JsonProperty(PropertyName = "type")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "type")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public GeospatialType GeospatialType
         {
             get; set;

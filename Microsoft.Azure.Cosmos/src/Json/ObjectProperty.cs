@@ -9,9 +9,8 @@ namespace Microsoft.Azure.Cosmos.Json
 #if INTERNAL
     public
 #else
-    internal
-#endif
-    readonly struct ObjectProperty
+    #endif
+        public readonly struct ObjectProperty
     {
         /// <summary>
         /// Initializes a new instance of the ObjectProperty struct.

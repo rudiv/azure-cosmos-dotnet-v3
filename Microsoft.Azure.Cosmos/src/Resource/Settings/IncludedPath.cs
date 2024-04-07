@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Cosmos
         /// Some valid examples: /"prop"/?, /"prop"/**, /"prop"/"subprop"/?, /"prop"/[]/?
         /// </remarks>
         /// <seealso href="https://docs.microsoft.com/azure/cosmos-db/index-policy"/>
-        [JsonProperty(PropertyName = Constants.Properties.Path)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Path)]
         public string Path { get; set; }
 
         /// <summary>
@@ -34,13 +34,14 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// The collection of the <see cref="Index"/> objects to be applied for this included path.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.Indexes)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Indexes)]
         internal Collection<Cosmos.Index> Indexes { get; set; } = new Collection<Cosmos.Index>();
 
         /// <summary>
         /// Gets or sets whether this is a full index used for collection types.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.IsFullIndex, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.IsFullIndex)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal bool? IsFullIndex { get; set; }
 
         /// <summary>

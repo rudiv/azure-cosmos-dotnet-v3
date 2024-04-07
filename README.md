@@ -1,3 +1,40 @@
+# TOTALLY UNSUPPORTED
+
+You know how Go has an azcosmos that kinda like, does what you need and nothing more? This is that but for .NET Native AOT.
+
+I mean it's not, cos it's the whole SDK that I've bastardised to cut out as much Newtonsoft.Json as possible and make it run in AOT land.
+
+These are tested (in the AotTest project):
+`.GetItemQueryIterator<T>`
+`CreateItemAsync`
+`ReplaceItemAsync`
+`DeleteItemAsync`
+
+So literally everything you need.
+
+If you want to use it just like, generate a package locally or something. This is an insane thing and I'm probably not going to publish it to NuGet.
+
+It:
+- Compiles and runs in AOT! Ignore the warnings....
+- Still references Newtonsoft.Json. I got a headache with the amount of crap in here.
+- Is still overly huge for absolutely no reason.
+- Supports Hierarchical Partition Keys. Actually not sure about the non-hierarchical stuff.
+- Has lots of stuff deleted, YMMV.
+- Does not support LINQ because... why? Come on.
+- Doesn't support the Change Feed processor...
+- Had to have the .Direct thing pulled in to this repo as it just seems to hold a lot of really important stuff.
+
+I want to:
+- Figure out what this HybridRow thing does, as with most of the code, it's unnecessary
+- Figure out why it tries to read in Strong mode and then breaks because there's no minimum replicas.
+- Kill .Direct
+- Kill most of the SDK, this is intended only for lightweight services
+- Have the Cosmos DB Emulator on OSX
+- Figure out how to kill all the warnings in Rider
+- Add a TestContainer to test that it's not broken in AOT
+
+---------
+
 [![NuGet](https://img.shields.io/nuget/v/Microsoft.Azure.Cosmos.svg)](https://www.nuget.org/packages/Microsoft.Azure.Cosmos)
 [![NuGet Prerelease](https://img.shields.io/nuget/vpre/Microsoft.Azure.Cosmos.svg)](https://www.nuget.org/packages/Microsoft.Azure.Cosmos)
 

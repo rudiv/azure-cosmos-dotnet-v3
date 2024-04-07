@@ -78,26 +78,30 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
         /// <summary>
         /// Gets the Encryption algorithm that will be used along with this data encryption key to encrypt/decrypt data.
         /// </summary>
-        [JsonProperty(PropertyName = "encryptionAlgorithm", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "encryptionAlgorithm")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string EncryptionAlgorithm { get; internal set; }
 
         /// <summary>
         /// Gets wrapped form of the data encryption key.
         /// </summary>
-        [JsonProperty(PropertyName = "wrappedDataEncryptionKey", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "wrappedDataEncryptionKey")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public byte[] WrappedDataEncryptionKey { get; internal set; }
 
         /// <summary>
         /// Gets metadata for the wrapping provider that can be used to unwrap the wrapped data encryption key.
         /// </summary>
-        [JsonProperty(PropertyName = "keyWrapMetadata", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "keyWrapMetadata")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public EncryptionKeyWrapMetadata EncryptionKeyWrapMetadata { get; internal set; }
 
         /// <summary>
         /// Gets the creation time of the resource from the Azure Cosmos DB service.
         /// </summary>
         [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty(PropertyName = "createTime", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "createTime")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public DateTime? CreatedTime { get; internal set; }
 
         /// <summary>
@@ -109,7 +113,8 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
         /// <remarks>
         /// ETags are used for concurrency checking when updating resources.
         /// </remarks>
-        [JsonProperty(PropertyName = "_etag", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "_etag")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string ETag { get; internal set; }
 
         /// <summary>
@@ -117,7 +122,8 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
         /// </summary>
         /// <value>The last modified time stamp associated with the resource.</value>
         [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty(PropertyName = "_ts", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "_ts")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public DateTime? LastModified { get; internal set; }
 
         /// <summary>
@@ -128,7 +134,8 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
         /// A self-link is a static addressable Uri for each resource within a database account and follows the Azure Cosmos DB resource model.
         /// E.g. a self-link for a document could be dbs/db_resourceid/colls/coll_resourceid/documents/doc_resourceid
         /// </remarks>
-        [JsonProperty(PropertyName = "_self", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "_self")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public virtual string SelfLink { get; internal set; }
 
         /// <summary>
@@ -142,7 +149,8 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
         /// resource whether that is a database, a collection or a document.
         /// These resource ids are used when building up SelfLinks, a static addressable Uri for each resource within a database account.
         /// </remarks>
-        [JsonProperty(PropertyName = "_rid", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "_rid")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal string ResourceId { get; set; }
 
         /// <summary>

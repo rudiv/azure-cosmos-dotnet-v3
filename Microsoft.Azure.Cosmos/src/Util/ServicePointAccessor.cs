@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
 
+#pragma warning disable SYSLIB0014
 namespace Microsoft.Azure.Cosmos
 {
     using System;

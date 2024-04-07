@@ -14,9 +14,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1600 // Elements should be documented
     public
 #else
-    internal
-#endif
-    sealed class CosmosNull : CosmosElement, IEquatable<CosmosNull>, IComparable<CosmosNull>
+    #endif
+        public sealed class CosmosNull : CosmosElement, IEquatable<CosmosNull>, IComparable<CosmosNull>
     {
         private const uint Hash = 448207988;
 
@@ -42,12 +41,12 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return cosmosElementVisitor.Visit(this, input);
         }
 
-        public override bool Equals(CosmosElement cosmosElement)
+        public override bool Equals(CosmosElement? cosmosElement)
         {
             return cosmosElement is CosmosNull cosmosNull && this.Equals(cosmosNull);
         }
 
-        public bool Equals(CosmosNull cosmosNull)
+        public bool Equals(CosmosNull? cosmosNull)
         {
             return true;
         }
@@ -91,7 +90,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return CosmosElement.TryParse<CosmosNull>(json, out cosmosNull);
         }
 
-        public int CompareTo(CosmosNull other)
+        public int CompareTo(CosmosNull? other)
         {
             return 0;
         }

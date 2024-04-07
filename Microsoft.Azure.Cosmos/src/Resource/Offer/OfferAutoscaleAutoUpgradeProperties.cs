@@ -24,7 +24,8 @@ namespace Microsoft.Azure.Cosmos
             this.ThroughputProperties = new AutoscaleThroughputProperties(incrementPercent);
         }
 
-        [JsonProperty(PropertyName = Constants.Properties.AutopilotThroughputPolicy, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.AutopilotThroughputPolicy)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public AutoscaleThroughputProperties ThroughputProperties { get; private set; }
 
         /// <summary>
@@ -46,7 +47,8 @@ namespace Microsoft.Azure.Cosmos
                 this.IncrementPercent = incrementPercent;
             }
 
-            [JsonProperty(PropertyName = Constants.Properties.AutopilotThroughputPolicyIncrementPercent, NullValueHandling = NullValueHandling.Ignore)]
+            [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.AutopilotThroughputPolicyIncrementPercent)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
             public int IncrementPercent { get; private set; }
 
             /// <summary>

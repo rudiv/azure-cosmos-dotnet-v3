@@ -32,6 +32,7 @@ namespace Microsoft.Azure.Cosmos
     using Microsoft.Azure.Documents.FaultInjection;
     using Microsoft.Azure.Documents.Routing;
     using Newtonsoft.Json;
+    using ResourceType = Microsoft.Azure.Documents.ResourceType;
 
     /// <summary>
     /// Provides a client-side logical representation for the Azure Cosmos DB service.
@@ -140,7 +141,9 @@ namespace Microsoft.Azure.Cosmos
         private int rntbdPortPoolBindAttempts = DefaultRntbdPortPoolBindAttempts;
         private int rntbdReceiveHangDetectionTimeSeconds = DefaultRntbdReceiveHangDetectionTimeSeconds;
         private int rntbdSendHangDetectionTimeSeconds = DefaultRntbdSendHangDetectionTimeSeconds;
+#if !NATIVE
         private bool enableCpuMonitor = DefaultEnableCpuMonitor;
+#endif
         private int rntbdMaxConcurrentOpeningConnectionCount = 5;
         private string clientId;
 
@@ -240,7 +243,7 @@ namespace Microsoft.Azure.Cosmos
 
             this.Initialize(serviceEndpoint, connectionPolicy, desiredConsistencyLevel);
             this.initTaskCache = new AsyncCacheNonBlocking<string, bool>(cancellationToken: this.cancellationTokenSource.Token);
-            this.isReplicaAddressValidationEnabled = ConfigurationManager.IsReplicaAddressValidationEnabled(connectionPolicy);
+            this.isReplicaAddressValidationEnabled = true; //ConfigurationManager.IsReplicaAddressValidationEnabled(connectionPolicy);
         }
 
         /// <summary>
@@ -629,54 +632,9 @@ namespace Microsoft.Azure.Cosmos
         /// </example>
         public Task OpenAsync(CancellationToken cancellationToken = default)
         {
-            return TaskHelper.InlineIfPossibleAsync(() => this.OpenPrivateInlineAsync(cancellationToken), null, cancellationToken);
+            throw new NotImplementedException();
         }
 
-        private async Task OpenPrivateInlineAsync(CancellationToken cancellationToken)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-            await TaskHelper.InlineIfPossibleAsync(() => this.OpenPrivateAsync(cancellationToken), this.ResetSessionTokenRetryPolicy.GetRequestPolicy(), cancellationToken);
-        }
-
-        private async Task OpenPrivateAsync(CancellationToken cancellationToken)
-        {
-            // Initialize caches for all databases and collections
-            ResourceFeedReader<Documents.Database> databaseFeedReader = this.CreateDatabaseFeedReader(
-                new FeedOptions { MaxItemCount = -1 });
-
-            try
-            {
-                while (databaseFeedReader.HasMoreResults)
-                {
-                    foreach (Documents.Database database in await databaseFeedReader.ExecuteNextAsync(cancellationToken))
-                    {
-                        ResourceFeedReader<DocumentCollection> collectionFeedReader = this.CreateDocumentCollectionFeedReader(
-                            database.SelfLink,
-                            new FeedOptions { MaxItemCount = -1 });
-                        List<Task> tasks = new List<Task>();
-                        while (collectionFeedReader.HasMoreResults)
-                        {
-                            tasks.AddRange((await collectionFeedReader.ExecuteNextAsync(cancellationToken)).Select(collection => this.InitializeCachesAsync(database.Id, collection, cancellationToken)));
-                        }
-
-                        await Task.WhenAll(tasks);
-                    }
-                }
-            }
-            catch (DocumentClientException ex)
-            {
-                // Clear the caches to ensure that we don't have partial results
-                this.collectionCache = new ClientCollectionCache(
-                    sessionContainer: this.sessionContainer, 
-                    storeModel: this.GatewayStoreModel, 
-                    tokenProvider: this, 
-                    retryPolicy: this.retryPolicy,
-                    telemetryToServiceHelper: this.telemetryToServiceHelper);
-                this.partitionKeyRangeCache = new PartitionKeyRangeCache(this, this.GatewayStoreModel, this.collectionCache, this.GlobalEndpointManager);
-
-                DefaultTrace.TraceWarning("{0} occurred while OpenAsync. Exception Message: {1}", ex.ToString(), ex.Message);
-            }
-        }
 
         internal virtual void Initialize(Uri serviceEndpoint,
             ConnectionPolicy connectionPolicy = null,
@@ -705,7 +663,7 @@ namespace Microsoft.Azure.Cosmos
                 return new QueryPartitionProvider(this.accountServiceConfiguration.QueryEngineConfiguration);
             }, CancellationToken.None);
 
-#if !(NETSTANDARD15 || NETSTANDARD16)
+#if !(NETSTANDARD15 || NETSTANDARD16) && !NATIVE
 #if NETSTANDARD20
             // GetEntryAssembly returns null when loaded from native netstandard2.0
             if (System.Reflection.Assembly.GetEntryAssembly() != null)
@@ -1919,9 +1877,7 @@ namespace Microsoft.Azure.Cosmos
                 typedDocument,
                 ResourceType.Document,
                 AuthorizationTokenType.PrimaryMasterKey,
-                headers,
-                SerializationFormattingPolicy.None,
-                this.GetSerializerSettingsForRequest(options)))
+                headers))
             {
                 await this.AddPartitionKeyInformationAsync(request, typedDocument, options);
                 return new ResourceResponse<Document>(await this.CreateAsync(request, retryPolicyInstance, cancellationToken));
@@ -2781,7 +2737,6 @@ namespace Microsoft.Azure.Cosmos
                 headers))
             {
                 await this.AddPartitionKeyInformationAsync(request, options);
-                request.SerializerSettings = this.GetSerializerSettingsForRequest(options);
                 return new ResourceResponse<Document>(await this.DeleteAsync(request, retryPolicyInstance, cancellationToken));
             }
         }
@@ -3349,8 +3304,7 @@ namespace Microsoft.Azure.Cosmos
                 ResourceType.Document,
                 AuthorizationTokenType.PrimaryMasterKey,
                 headers,
-                SerializationFormattingPolicy.None,
-                this.GetSerializerSettingsForRequest(options)))
+                SerializationFormattingPolicy.None))
             {
                 await this.AddPartitionKeyInformationAsync(request, document, options);
                 return new ResourceResponse<Document>(await this.UpdateAsync(request, retryPolicyInstance, cancellationToken));
@@ -3866,7 +3820,6 @@ namespace Microsoft.Azure.Cosmos
                 headers))
             {
                 await this.AddPartitionKeyInformationAsync(request, options);
-                request.SerializerSettings = this.GetSerializerSettingsForRequest(options);
                 return new ResourceResponse<Document>(await this.ReadAsync(request, retryPolicyInstance, cancellationToken));
             }
         }
@@ -3948,7 +3901,6 @@ namespace Microsoft.Azure.Cosmos
                 headers))
             {
                 await this.AddPartitionKeyInformationAsync(request, options);
-                request.SerializerSettings = this.GetSerializerSettingsForRequest(options);
                 return new DocumentResponse<T>(await this.ReadAsync(request, retryPolicyInstance, cancellationToken), this.GetSerializerSettingsForRequest(options));
             }
         }
@@ -4512,7 +4464,7 @@ namespace Microsoft.Azure.Cosmos
                 headers))
             {
                 await this.AddPartitionKeyInformationAsync(request, options);
-                request.SerializerSettings = this.GetSerializerSettingsForRequest(options);
+                
                 return new ResourceResponse<Schema>(await this.ReadAsync(request, retryPolicyInstance));
             }
         }
@@ -4593,877 +4545,6 @@ namespace Microsoft.Azure.Cosmos
             {
                 return new ResourceResponse<UserDefinedType>(await this.ReadAsync(request, retryPolicyInstance));
             }
-        }
-
-        /// <summary>
-        /// Reads a <see cref="Microsoft.Azure.Documents.Snapshot"/> from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="snapshotLink">The link of the Snapshot resource to be read.</param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.Snapshot"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="snapshotLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when reading a Snapshot are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource you tried to read did not exist.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// //Reads a Snapshot resource where
-        /// // - snapshot_id is the ID property of the Snapshot resource you wish to read.
-        /// var snapshotLink = "/snapshots/snapshot_id";
-        /// Snapshot snapshot= await client.ReadSnapshotAsync(snapshotLink);
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <remarks>
-        /// <para>
-        /// Doing a read of a resource is the most efficient way to get a resource from the Azure Cosmos DB service. If you know the resource's ID, do a read instead of a query by ID.
-        /// </para>
-        /// <para>
-        /// The example shown uses ID-based links, where the link is composed of the ID properties used when the resources were created.
-        /// You can still use the <see cref="Microsoft.Azure.Documents.Resource.SelfLink"/> property of the Snapshot if you prefer. A self-link is a URI for a resource that is made up of Resource Identifiers  (or the _rid properties).
-        /// ID-based links and SelfLink will both work.
-        /// The format for <paramref name="snapshotLink"/> is always "/snapshots/{snapshot identifier}" only
-        /// the values within the {} change depending on which method you wish to use to address the resource.
-        /// </para>
-        /// </remarks>
-        /// <seealso cref="Microsoft.Azure.Documents.Snapshot"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        /// <seealso cref="System.Uri"/>
-        internal Task<ResourceResponse<Snapshot>> ReadSnapshotAsync(string snapshotLink, Documents.Client.RequestOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(() => this.ReadSnapshotPrivateAsync(snapshotLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<ResourceResponse<Snapshot>> ReadSnapshotPrivateAsync(string snapshotLink, Documents.Client.RequestOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(snapshotLink))
-            {
-                throw new ArgumentNullException("snapshotLink");
-            }
-
-            INameValueCollection headers = this.GetRequestHeaders(options, OperationType.Read, ResourceType.Snapshot);
-            using (DocumentServiceRequest request = DocumentServiceRequest.Create(
-                OperationType.Read,
-                ResourceType.Snapshot,
-                snapshotLink,
-                AuthorizationTokenType.PrimaryMasterKey,
-                headers))
-            {
-                return new ResourceResponse<Snapshot>(await this.ReadAsync(request, retryPolicyInstance));
-            }
-        }
-
-        #endregion
-
-        #region ReadFeed Impl
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.Database"/> for a database account from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.Database"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<Database> response = await client.ReadDatabaseFeedAsync(new FeedOptions
-        ///                                                                 {
-        ///                                                                     MaxItemCount = 10,
-        ///                                                                     RequestContinuation = continuation
-        ///                                                                 });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.Database"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<Documents.Database>> ReadDatabaseFeedAsync(FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadDatabaseFeedPrivateAsync(options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<Documents.Database>> ReadDatabaseFeedPrivateAsync(FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            return await this.CreateDatabaseFeedReader(options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.PartitionKeyRange"/> for a database account from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="partitionKeyRangesOrCollectionLink">The link of the resources to be read, or owner collection link, SelfLink or AltLink. E.g. /dbs/db_rid/colls/coll_rid/pkranges</param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.Database"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// DoucmentFeedResponse<PartitionKeyRange> response = null;
-        /// List<string> ids = new List<string>();
-        /// do
-        /// {
-        ///     response = await client.ReadPartitionKeyRangeFeedAsync(collection.SelfLink, new FeedOptions { MaxItemCount = 1000 });
-        ///     foreach (var item in response)
-        ///     {
-        ///         ids.Add(item.Id);
-        ///     }
-        /// }
-        /// while (!string.IsNullOrEmpty(response.ResponseContinuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.PartitionKeyRange"/>
-        /// <seealso cref="Microsoft.Azure.Cosmos.FeedOptions"/>
-        /// <seealso cref="Microsoft.Azure.Cosmos.DocumentFeedResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<PartitionKeyRange>> ReadPartitionKeyRangeFeedAsync(string partitionKeyRangesOrCollectionLink, FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadPartitionKeyRangeFeedPrivateAsync(partitionKeyRangesOrCollectionLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<PartitionKeyRange>> ReadPartitionKeyRangeFeedPrivateAsync(string partitionKeyRangesLink, FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(partitionKeyRangesLink))
-            {
-                throw new ArgumentNullException("partitionKeyRangesLink");
-            }
-
-            return await this.CreatePartitionKeyRangeFeedReader(partitionKeyRangesLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.DocumentCollection"/> for a database from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="collectionsLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/colls/ </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.DocumentCollection"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="collectionsLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<DocumentCollection> response = await client.ReadDocumentCollectionFeedAsync("/dbs/db_rid/colls/",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.DocumentCollection"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<DocumentCollection>> ReadDocumentCollectionFeedAsync(string collectionsLink, FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadDocumentCollectionFeedPrivateAsync(collectionsLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<DocumentCollection>> ReadDocumentCollectionFeedPrivateAsync(string collectionsLink, FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(collectionsLink))
-            {
-                throw new ArgumentNullException("collectionsLink");
-            }
-
-            return await this.CreateDocumentCollectionFeedReader(collectionsLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.StoredProcedure"/> for a collection from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="storedProceduresLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/colls/col_rid/sprocs/ </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.StoredProcedure"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="storedProceduresLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<StoredProcedure> response = await client.ReadStoredProcedureFeedAsync("/dbs/db_rid/colls/col_rid/sprocs/",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.StoredProcedure"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<StoredProcedure>> ReadStoredProcedureFeedAsync(string storedProceduresLink, FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadStoredProcedureFeedPrivateAsync(storedProceduresLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<StoredProcedure>> ReadStoredProcedureFeedPrivateAsync(string storedProceduresLink, FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(storedProceduresLink))
-            {
-                throw new ArgumentNullException("storedProceduresLink");
-            }
-
-            return await this.CreateStoredProcedureFeedReader(storedProceduresLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.Trigger"/> for a collection from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="triggersLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/colls/col_rid/triggers/ </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.Trigger"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="triggersLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<Trigger> response = await client.ReadTriggerFeedAsync("/dbs/db_rid/colls/col_rid/triggers/",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.Trigger"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<Trigger>> ReadTriggerFeedAsync(string triggersLink, FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadTriggerFeedPrivateAsync(triggersLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<Trigger>> ReadTriggerFeedPrivateAsync(string triggersLink, FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(triggersLink))
-            {
-                throw new ArgumentNullException("triggersLink");
-            }
-
-            return await this.CreateTriggerFeedReader(triggersLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.UserDefinedFunction"/> for a collection from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="userDefinedFunctionsLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/colls/col_rid/udfs/ </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.UserDefinedFunction"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="userDefinedFunctionsLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<UserDefinedFunction> response = await client.ReadUserDefinedFunctionFeedAsync("/dbs/db_rid/colls/col_rid/udfs/",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.UserDefinedFunction"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<UserDefinedFunction>> ReadUserDefinedFunctionFeedAsync(string userDefinedFunctionsLink, FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadUserDefinedFunctionFeedPrivateAsync(userDefinedFunctionsLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<UserDefinedFunction>> ReadUserDefinedFunctionFeedPrivateAsync(string userDefinedFunctionsLink, FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(userDefinedFunctionsLink))
-            {
-                throw new ArgumentNullException("userDefinedFunctionsLink");
-            }
-
-            return await this.CreateUserDefinedFunctionFeedReader(userDefinedFunctionsLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of documents for a specified collection from the Azure Cosmos DB service.
-        /// This takes returns a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which will contain an enumerable list of dynamic objects.
-        /// </summary>
-        /// <param name="documentsLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/colls/coll_rid/docs/ </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <param name="cancellationToken">(Optional) A <see cref="CancellationToken"/> that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> containing dynamic objects representing the items in the feed.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="documentsLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<dynamic> response = await client.ReadDocumentFeedAsync("/dbs/db_rid/colls/coll_rid/docs/",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <remarks>
-        /// Instead of DoucmentFeedResponse{Document} this method takes advantage of dynamic objects in .NET. This way a single feed result can contain any kind of Document, or POCO object.
-        /// This is important becuse a DocumentCollection can contain different kinds of documents.
-        /// </remarks>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<dynamic>> ReadDocumentFeedAsync(string documentsLink, FeedOptions options = null, CancellationToken cancellationToken = default)
-        {
-            return TaskHelper.InlineIfPossible(() => this.ReadDocumentFeedInlineAsync(documentsLink, options, cancellationToken), null, cancellationToken);
-        }
-
-        private async Task<DocumentFeedResponse<dynamic>> ReadDocumentFeedInlineAsync(string documentsLink, FeedOptions options, CancellationToken cancellationToken)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(documentsLink))
-            {
-                throw new ArgumentNullException("documentsLink");
-            }
-
-            DocumentFeedResponse<Document> response = await this.CreateDocumentFeedReader(documentsLink, options).ExecuteNextAsync(cancellationToken);
-            return new DocumentFeedResponse<dynamic>(
-                response.Cast<dynamic>(),
-                response.Count,
-                response.Headers,
-                response.UseETagAsContinuation,
-                response.QueryMetrics,
-                response.RequestStatistics,
-                responseLengthBytes: response.ResponseLengthBytes);
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.Conflict"/> for a collection from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="conflictsLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/colls/coll_rid/conflicts/ </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.Conflict"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="conflictsLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<Conflict> response = await client.ReadConflictAsync("/dbs/db_rid/colls/coll_rid/conflicts/",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.Conflict"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<Conflict>> ReadConflictFeedAsync(string conflictsLink, FeedOptions options = null)
-        {
-            return TaskHelper.InlineIfPossible(() => this.ReadConflictFeedInlineAsync(conflictsLink, options), null);
-        }
-
-        private async Task<DocumentFeedResponse<Conflict>> ReadConflictFeedInlineAsync(string conflictsLink, FeedOptions options)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(conflictsLink))
-            {
-                throw new ArgumentNullException("conflictsLink");
-            }
-
-            return await this.CreateConflictFeedReader(conflictsLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.Offer"/> for a database account from the Azure Cosmos DB service
-        /// as an asynchronous operation.
-        /// </summary>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.Offer"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<Offer> response = await client.ReadOfferAsync(new FeedOptions
-        ///                                                                 {
-        ///                                                                     MaxItemCount = 10,
-        ///                                                                     RequestContinuation = continuation
-        ///                                                                 });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.Offer"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        public Task<DocumentFeedResponse<Offer>> ReadOffersFeedAsync(FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadOfferFeedPrivateAsync(options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<Offer>> ReadOfferFeedPrivateAsync(FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            return await this.CreateOfferFeedReader(options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.Schema"/> for a collection as an asynchronous operation.
-        /// </summary>
-        /// <param name="documentCollectionSchemaLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/colls/coll_rid/schemas </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.Schema"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<User> response = await client.ReadUserFeedAsync("/dbs/db_rid/colls/coll_rid/schemas",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.Schema"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        internal Task<DocumentFeedResponse<Schema>> ReadSchemaFeedAsync(string documentCollectionSchemaLink, FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(() => this.ReadSchemaFeedPrivateAsync(documentCollectionSchemaLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<Schema>> ReadSchemaFeedPrivateAsync(string documentCollectionSchemaLink, FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(documentCollectionSchemaLink))
-            {
-                throw new ArgumentNullException("documentCollectionSchemaLink");
-            }
-
-            return await this.CreateSchemaFeedReader(documentCollectionSchemaLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.UserDefinedType"/> for a database from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="userDefinedTypesLink">The SelfLink of the resources to be read. E.g. /dbs/db_rid/udts/ </param>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/> which wraps a <see cref="Microsoft.Azure.Documents.UserDefinedType"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="userDefinedTypesLink"/> is not set.</exception>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a UserDefinedType are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>404</term><description>NotFound - This means the resource feed you tried to read did not exist. Check the parent rids are correct.</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DoucmentFeedResponse<UserDefinedType> response = await client.ReadUserDefinedTypeFeedAsync("/dbs/db_rid/udts/",
-        ///                                                     new FeedOptions
-        ///                                                     {
-        ///                                                         MaxItemCount = 10,
-        ///                                                         RequestContinuation = continuation
-        ///                                                     });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.UserDefinedType"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        internal Task<DocumentFeedResponse<UserDefinedType>> ReadUserDefinedTypeFeedAsync(string userDefinedTypesLink, FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadUserDefinedTypeFeedPrivateAsync(userDefinedTypesLink, options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<UserDefinedType>> ReadUserDefinedTypeFeedPrivateAsync(string userDefinedTypesLink, FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            if (string.IsNullOrEmpty(userDefinedTypesLink))
-            {
-                throw new ArgumentNullException("userDefinedTypesLink");
-            }
-
-            return await this.CreateUserDefinedTypeFeedReader(userDefinedTypesLink, options).ExecuteNextAsync();
-        }
-
-        /// <summary>
-        /// Reads the feed (sequence) of <see cref="Microsoft.Azure.Documents.Snapshot"/> for a database account from the Azure Cosmos DB service as an asynchronous operation.
-        /// </summary>
-        /// <param name="options">(Optional) The request options for the request.</param>
-        /// <returns>
-        /// A <see cref="System.Threading.Tasks"/> containing a <see cref="Microsoft.Azure.Cosmos.DocumentFeedResponse{T}"/> which wraps a set of <see cref="Microsoft.Azure.Documents.Snapshot"/> containing the read resource record.
-        /// </returns>
-        /// <exception cref="DocumentClientException">This exception can encapsulate many different types of errors. To determine the specific error always look at the StatusCode property. Some common codes you may get when creating a Document are:
-        /// <list type="table">
-        ///     <listheader>
-        ///         <term>StatusCode</term><description>Reason for exception</description>
-        ///     </listheader>
-        ///     <item>
-        ///         <term>429</term><description>TooManyRequests - This means you have exceeded the number of request units per second. Consult the DocumentClientException.RetryAfter value to see how long you should wait before retrying this operation.</description>
-        ///     </item>
-        /// </list>
-        /// </exception>
-        /// <example>
-        /// <code language="c#">
-        /// <![CDATA[
-        /// int count = 0;
-        /// string continuation = string.Empty;
-        /// do
-        /// {
-        ///     // Read the feed 10 items at a time until there are no more items to read
-        ///     DocumentFeedResponse<Snapshot> response = await client.ReadSnapshotFeedAsync(new FeedOptions
-        ///                                                                 {
-        ///                                                                     MaxItemCount = 10,
-        ///                                                                     RequestContinuation = continuation
-        ///                                                                 });
-        ///
-        ///     // Append the item count
-        ///     count += response.Count;
-        ///
-        ///     // Get the continuation so that we know when to stop.
-        ///      continuation = response.ResponseContinuation;
-        /// } while (!string.IsNullOrEmpty(continuation));
-        /// ]]>
-        /// </code>
-        /// </example>
-        /// <seealso cref="Microsoft.Azure.Documents.Snapshot"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.RequestOptions"/>
-        /// <seealso cref="Microsoft.Azure.Documents.Client.ResourceResponse{T}"/>
-        /// <seealso cref="System.Threading.Tasks.Task"/>
-        internal Task<DocumentFeedResponse<Snapshot>> ReadSnapshotFeedAsync(FeedOptions options = null)
-        {
-            IDocumentClientRetryPolicy retryPolicyInstance = this.ResetSessionTokenRetryPolicy.GetRequestPolicy();
-            return TaskHelper.InlineIfPossible(
-                () => this.ReadSnapshotFeedPrivateAsync(options, retryPolicyInstance), retryPolicyInstance);
-        }
-
-        private async Task<DocumentFeedResponse<Snapshot>> ReadSnapshotFeedPrivateAsync(FeedOptions options, IDocumentClientRetryPolicy retryPolicyInstance)
-        {
-            await this.EnsureValidClientAsync(NoOpTrace.Singleton);
-
-            return await this.CreateSnapshotFeedReader(options).ExecuteNextAsync();
         }
 
         #endregion
@@ -5597,46 +4678,7 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException("storedProcedureLink");
             }
 
-            JsonSerializerSettings serializerSettings = this.GetSerializerSettingsForRequest(options);
-            string storedProcedureInput = serializerSettings == null ?
-                JsonConvert.SerializeObject(procedureParams) :
-                JsonConvert.SerializeObject(procedureParams, serializerSettings);
-            using (MemoryStream storedProcedureInputStream = new MemoryStream())
-            {
-                using (StreamWriter writer = new StreamWriter(storedProcedureInputStream))
-                {
-                    await writer.WriteAsync(storedProcedureInput);
-                    await writer.FlushAsync();
-                    storedProcedureInputStream.Position = 0;
-
-                    INameValueCollection headers = this.GetRequestHeaders(options, OperationType.ExecuteJavaScript, ResourceType.StoredProcedure);
-                    using (DocumentServiceRequest request = DocumentServiceRequest.Create(
-                        OperationType.ExecuteJavaScript,
-                        ResourceType.StoredProcedure,
-                        storedProcedureLink,
-                        storedProcedureInputStream,
-                        AuthorizationTokenType.PrimaryMasterKey,
-                        headers))
-                    {
-                        request.Headers[HttpConstants.HttpHeaders.XDate] = Rfc1123DateTimeCache.UtcNow();
-                        if (options?.PartitionKeyRangeId == null)
-                        {
-                            await this.AddPartitionKeyInformationAsync(
-                                request,
-                                options);
-                        }
-
-                        retryPolicyInstance?.OnBeforeSendRequest(request);
-
-                        request.SerializerSettings = this.GetSerializerSettingsForRequest(options);
-                        return new StoredProcedureResponse<TValue>(await this.ExecuteProcedureAsync(
-                            request,
-                            retryPolicyInstance,
-                            cancellationToken),
-                            this.GetSerializerSettingsForRequest(options));
-                    }
-                }
-            }
+            throw new Exception();
         }
 
         #endregion
@@ -5871,8 +4913,7 @@ namespace Microsoft.Azure.Cosmos
                 ResourceType.Document,
                 AuthorizationTokenType.PrimaryMasterKey,
                 headers,
-                SerializationFormattingPolicy.None,
-                this.GetSerializerSettingsForRequest(options)))
+                SerializationFormattingPolicy.None))
             {
                 await this.AddPartitionKeyInformationAsync(request, typedDocument, options);
 
@@ -6482,7 +5523,6 @@ namespace Microsoft.Azure.Cosmos
 
                     return request;
                 }
-
                 AccountProperties databaseAccount = await gatewayModel.GetDatabaseAccountAsync(CreateRequestMessage,
                                                                                                clientSideRequestStatistics: null);
                 this.UseMultipleWriteLocations = this.ConnectionPolicy.UseMultipleWriteLocations && databaseAccount.EnableMultipleWriteLocations;
@@ -6726,8 +5766,6 @@ namespace Microsoft.Azure.Cosmos
                 storeClient.AddDisableRntbdChannelCallback(new Action(this.DisableRntbdChannel));
             }
 
-            storeClient.SerializerSettings = this.serializerSettings;
-
             this.StoreModel = new ServerStoreModel(storeClient, this.sendingRequest, this.receivedResponse);
         }
 
@@ -6869,7 +5907,7 @@ namespace Microsoft.Azure.Cosmos
 
         private JsonSerializerSettings GetSerializerSettingsForRequest(Documents.Client.RequestOptions requestOptions)
         {
-            return requestOptions?.JsonSerializerSettings ?? this.serializerSettings;
+            return this.serializerSettings;
         }
 
         private INameValueCollection GetRequestHeaders(

@@ -13,9 +13,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1601 // Partial elements should be documented
     public
 #else
-    internal
-#endif
-    abstract partial class CosmosBinary : CosmosElement, IEquatable<CosmosBinary>, IComparable<CosmosBinary>
+    #endif
+        public abstract partial class CosmosBinary : CosmosElement, IEquatable<CosmosBinary>, IComparable<CosmosBinary>
     {
         private sealed class EagerCosmosBinary : CosmosBinary
         {

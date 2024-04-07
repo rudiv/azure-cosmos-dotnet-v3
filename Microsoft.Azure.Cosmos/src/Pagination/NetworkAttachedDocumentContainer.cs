@@ -14,7 +14,6 @@ namespace Microsoft.Azure.Cosmos.Pagination
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.ChangeFeed.Pagination;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.Diagnostics;
     using Microsoft.Azure.Cosmos.Json;
@@ -273,99 +272,6 @@ namespace Microsoft.Azure.Cosmos.Pagination
             return monadicQueryPage;
         }
 
-        public async Task<TryCatch<ChangeFeedPage>> MonadicChangeFeedAsync(
-            FeedRangeState<ChangeFeedState> feedRangeState,
-            ChangeFeedPaginationOptions changeFeedPaginationOptions,
-            ITrace trace,
-            CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (changeFeedPaginationOptions == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedPaginationOptions));
-            }
-
-            Stream streamPayload = null;
-            if (changeFeedPaginationOptions.ChangeFeedQuerySpec != null && changeFeedPaginationOptions.ChangeFeedQuerySpec.ShouldSerializeQueryText())
-            {
-                streamPayload = this.container.ClientContext.SerializerCore.ToStream<ChangeFeed.ChangeFeedQuerySpec>(changeFeedPaginationOptions.ChangeFeedQuerySpec);
-            }
-
-            ResponseMessage responseMessage = await this.container.ClientContext.ProcessResourceOperationStreamAsync(
-                resourceUri: this.container.LinkUri,
-                resourceType: ResourceType.Document,
-                operationType: OperationType.ReadFeed,
-                requestOptions: this.changeFeedRequestOptions,
-                cosmosContainerCore: this.container,
-                requestEnricher: (request) =>
-                {
-                    if (changeFeedPaginationOptions.PageSizeLimit.HasValue)
-                    {
-                        request.Headers.PageSize = changeFeedPaginationOptions.PageSizeLimit.Value.ToString();
-                    }
-
-                    feedRangeState.State.Accept(ChangeFeedStateRequestMessagePopulator.Singleton, request);
-
-                    changeFeedPaginationOptions.Mode.Accept(request);
-
-                    if (changeFeedPaginationOptions.JsonSerializationFormat.HasValue)
-                    {
-                        request.Headers.ContentSerializationFormat = changeFeedPaginationOptions.JsonSerializationFormat.Value.ToContentSerializationFormatString();
-                    }
-
-                    foreach (KeyValuePair<string, string> kvp in changeFeedPaginationOptions.AdditionalHeaders)
-                    {
-                        request.Headers[kvp.Key] = kvp.Value;
-                    }
-                },
-                feedRange: feedRangeState.FeedRange,
-                streamPayload: streamPayload ?? default,
-                trace: trace,
-                cancellationToken: cancellationToken);
-
-            TryCatch<ChangeFeedPage> monadicChangeFeedPage;
-            bool pageHasResult = (responseMessage.StatusCode == HttpStatusCode.OK) || (responseMessage.StatusCode == HttpStatusCode.NotModified);
-            if (pageHasResult)
-            {
-                double requestCharge = responseMessage.Headers.RequestCharge;
-                string activityId = responseMessage.Headers.ActivityId;
-                int itemCount = int.Parse(responseMessage.Headers.ItemCount);
-                ChangeFeedState state = ChangeFeedState.Continuation(CosmosString.Create(responseMessage.Headers.ETag));
-                Dictionary<string, string> additionalHeaders = GetAdditionalHeaders(
-                    responseMessage.Headers.CosmosMessageHeaders,
-                    ChangeFeedPage.BannedHeaders);
-
-                ChangeFeedPage changeFeedPage;
-                if (responseMessage.StatusCode == HttpStatusCode.OK)
-                {
-                    changeFeedPage = new ChangeFeedSuccessPage(
-                        responseMessage.Content,
-                        requestCharge,
-                        itemCount,
-                        activityId,
-                        additionalHeaders,
-                        state);
-                }
-                else
-                {
-                    changeFeedPage = new ChangeFeedNotModifiedPage(
-                        requestCharge,
-                        activityId,
-                        additionalHeaders,
-                        state);
-                }
-
-                monadicChangeFeedPage = TryCatch<ChangeFeedPage>.FromResult(changeFeedPage);
-            }
-            else
-            {
-                CosmosException cosmosException = CosmosExceptionFactory.Create(responseMessage);
-                monadicChangeFeedPage = TryCatch<ChangeFeedPage>.FromException(cosmosException);
-            }
-
-            return monadicChangeFeedPage;
-        }
 
         public async Task<TryCatch<string>> MonadicGetResourceIdentifierAsync(ITrace trace, CancellationToken cancellationToken)
         {
@@ -377,50 +283,6 @@ namespace Microsoft.Azure.Cosmos.Pagination
             catch (Exception ex)
             {
                 return TryCatch<string>.FromException(ex);
-            }
-        }
-
-        private sealed class ChangeFeedStateRequestMessagePopulator : IChangeFeedStateVisitor<RequestMessage>
-        {
-            public static readonly ChangeFeedStateRequestMessagePopulator Singleton = new ChangeFeedStateRequestMessagePopulator();
-
-            private const string IfNoneMatchAllHeaderValue = "*";
-
-            private static readonly DateTime StartFromBeginningTime = DateTime.MinValue.ToUniversalTime();
-
-            private ChangeFeedStateRequestMessagePopulator()
-            {
-            }
-
-            public void Visit(ChangeFeedStateBeginning changeFeedStateBeginning, RequestMessage message)
-            {
-                // We don't need to set any headers to start from the beginning
-            }
-
-            public void Visit(ChangeFeedStateTime changeFeedStateTime, RequestMessage message)
-            {
-                // Our current public contract for ChangeFeedProcessor uses DateTime.MinValue.ToUniversalTime as beginning.
-                // We need to add a special case here, otherwise it would send it as normal StartTime.
-                // The problem is Multi master accounts do not support StartTime header on ReadFeed, and thus,
-                // it would break multi master Change Feed Processor users using Start From Beginning semantics.
-                // It's also an optimization, since the backend won't have to binary search for the value.
-                if (changeFeedStateTime.StartTime != ChangeFeedStateRequestMessagePopulator.StartFromBeginningTime)
-                {
-                    message.Headers.Add(
-                        HttpConstants.HttpHeaders.IfModifiedSince,
-                        changeFeedStateTime.StartTime.ToString("r", CultureInfo.InvariantCulture));
-                }
-            }
-
-            public void Visit(ChangeFeedStateContinuation changeFeedStateContinuation, RequestMessage message)
-            {
-                // On REST level, change feed is using IfNoneMatch/ETag instead of continuation
-                message.Headers.IfNoneMatch = (changeFeedStateContinuation.ContinuationToken as CosmosString).Value;
-            }
-
-            public void Visit(ChangeFeedStateNow changeFeedStateNow, RequestMessage message)
-            {
-                message.Headers.IfNoneMatch = ChangeFeedStateRequestMessagePopulator.IfNoneMatchAllHeaderValue;
             }
         }
 

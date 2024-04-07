@@ -47,14 +47,14 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets or sets the full path in a document used for vector indexing.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.Path)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Path)]
         public string Path { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="VectorIndexType"/> for the vector index path.
         /// </summary>
-        [JsonProperty(PropertyName = "type")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "type")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public VectorIndexType Type { get; set; }
 
         /// <summary>

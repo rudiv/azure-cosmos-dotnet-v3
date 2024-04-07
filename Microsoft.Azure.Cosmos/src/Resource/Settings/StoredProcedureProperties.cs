@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// </summary>
         /// <value>The body of the stored procedure.</value>
         /// <remarks>Must be a valid JavaScript function. For e.g. "function () { getContext().getResponse().setBody('Hello World!'); }"</remarks>
-        [JsonProperty(PropertyName = Constants.Properties.Body)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Body)]
         public string Body
         {
             get => this.body;
@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
         ///  '/', '\\', '?', '#'
         /// </para>
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.Id)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Id)]
         public string Id
         {
             get => this.id;
@@ -83,7 +83,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// <remarks>
         /// ETags are used for concurrency checking when updating resources. 
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.ETag, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ETag)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string ETag { get; private set; }
 
         /// <summary>
@@ -91,7 +92,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// </summary>
         /// <value>The last modified timestamp associated with the resource.</value>
         [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty(PropertyName = Constants.Properties.LastModified, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.LastModified)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public DateTime? LastModified { get; private set; }
 
         /// <summary>
@@ -102,7 +104,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// A self-link is a static addressable Uri for each resource within a database account and follows the Azure Cosmos DB resource model.
         /// E.g. a self-link for a document could be dbs/db_resourceid/colls/coll_resourceid/documents/doc_resourceid
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.SelfLink, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.SelfLink)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string SelfLink { get; private set; }
 
         /// <summary>
@@ -116,7 +119,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// resource whether that is a database, a collection or a document.
         /// These resource ids are used when building up SelfLinks, a static addressable Uri for each resource within a database account.
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.RId, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.RId)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal string ResourceId { get; private set; }
 
         /// <summary>

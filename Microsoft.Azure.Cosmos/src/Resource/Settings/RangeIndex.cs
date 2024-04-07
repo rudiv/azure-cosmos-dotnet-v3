@@ -5,6 +5,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Text.Json.Serialization;
     using Microsoft.Azure.Documents;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
@@ -68,8 +69,8 @@ namespace Microsoft.Azure.Cosmos
         /// The data type for which this index should be applied.
         /// </value>
         /// <seealso href="https://docs.microsoft.com/azure/cosmos-db/index-policy"/>
-        [JsonProperty(PropertyName = Constants.Properties.DataType)]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.DataType)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public DataType DataType { get; set; }
 
         /// <summary>
@@ -79,8 +80,8 @@ namespace Microsoft.Azure.Cosmos
         /// The precision for this particular index. Returns null, if not set.
         /// </value>
         /// <seealso href="https://docs.microsoft.com/azure/cosmos-db/index-policy"/>
-        [JsonProperty(PropertyName = Constants.Properties.Precision,
-            NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Precision)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public short? Precision { get; set; }
 
         /// <summary>

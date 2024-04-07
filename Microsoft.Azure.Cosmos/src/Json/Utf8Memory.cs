@@ -14,9 +14,8 @@ namespace Microsoft.Azure.Cosmos.Json
 #pragma warning disable SA1600 // Elements should be documented
     public
 #else
-    internal
-#endif
-    readonly struct Utf8Memory : IEquatable<Utf8Memory>
+    #endif
+        public readonly struct Utf8Memory : IEquatable<Utf8Memory>
     {
         public static readonly Utf8Memory Empty = new Utf8Memory(ReadOnlyMemory<byte>.Empty);
 

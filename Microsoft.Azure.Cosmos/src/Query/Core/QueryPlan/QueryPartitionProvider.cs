@@ -10,6 +10,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
+    using System.Text.Json;
     using Microsoft.Azure.Cosmos.Core.Trace;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.ExecutionContext;
@@ -17,6 +18,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
     using Microsoft.Azure.Cosmos.Routing;
     using Microsoft.Azure.Cosmos.Tracing;
     using Newtonsoft.Json;
+    using JsonSerializer = System.Text.Json.JsonSerializer;
     using PartitionKeyDefinition = Documents.PartitionKeyDefinition;
     using PartitionKeyInternal = Documents.Routing.PartitionKeyInternal;
     using PartitionKind = Documents.PartitionKind;
@@ -152,7 +154,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             if (queryengineConfiguration.TryGetValue(CosmosQueryExecutionContextFactory.ClientDisableOptimisticDirectExecution, out object queryConfigProperty))
             {
-                return (bool)queryConfigProperty;
+                if (queryConfigProperty is JsonElement ele)
+                {
+                    return ele.GetBoolean();
+                }
             }
 
             return false;
@@ -300,13 +305,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
             }
 
             PartitionedQueryExecutionInfoInternal queryInfoInternal =
-               JsonConvert.DeserializeObject<PartitionedQueryExecutionInfoInternal>(
-                   serializedQueryExecutionInfo,
-                   new JsonSerializerSettings
-                   {
-                       DateParseHandling = DateParseHandling.None,
-                       MaxDepth = 64, // https://github.com/advisories/GHSA-5crp-9r3c-p9vr
-                   });
+                JsonSerializer.Deserialize<PartitionedQueryExecutionInfoInternal>(serializedQueryExecutionInfo);
 
             Debug.Assert(!(queryInfoInternal.QueryInfo.HasTop && queryInfoInternal.QueryInfo.HasLimit));
 

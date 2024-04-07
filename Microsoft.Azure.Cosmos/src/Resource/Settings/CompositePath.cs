@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos
         /// Gets or sets the full path in a document used for composite indexing.
         /// We do not support wild cards in the path.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.Path)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Path)]
         public string Path { get; set; }
 
         /// <summary>
@@ -48,8 +48,8 @@ namespace Microsoft.Azure.Cosmos
         /// For example if you want to run the query "SELECT * FROM c ORDER BY c.age asc, c.height desc",
         /// then you need to make the order for "/age" "ascending" and the order for "/height" "descending".
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.Order)]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Order)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public CompositePathSortOrder Order { get; set; }
 
         /// <summary>

@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Cosmos
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json.Serialization;
     using Microsoft.Azure.Documents;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -32,7 +33,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Default constructor for serialization
         /// </summary>
-        [JsonConstructor]
+        [Newtonsoft.Json.JsonConstructor]
         internal ThroughputProperties()
         {
         }
@@ -55,21 +56,23 @@ namespace Microsoft.Azure.Cosmos
         /// <remarks>
         /// ETags are used for concurrency checking when updating resources.
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.ETag, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ETag)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string ETag { get; private set; }
 
         /// <summary>
         /// Gets the last modified time stamp associated with <see cref="DatabaseProperties" /> from the Azure Cosmos DB service.
         /// </summary>
         /// <value>The last modified time stamp associated with the resource.</value>
-        [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty(PropertyName = Constants.Properties.LastModified, NullValueHandling = NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(UnixDateTimeConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.LastModified)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public DateTime? LastModified { get; private set; }
 
         /// <summary>
         /// Gets the provisioned throughput for a resource in measurement of request units per second in the Azure Cosmos service.
         /// </summary>
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public int? Throughput
         {
             get => this.Content?.OfferThroughput;
@@ -79,13 +82,13 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// The maximum throughput the autoscale will scale to.
         /// </summary>
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public int? AutoscaleMaxThroughput => this.Content?.OfferAutoscaleSettings?.MaxThroughput;
 
         /// <summary>
         /// The amount to increment if the maximum RUs is getting throttled.
         /// </summary>
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         internal int? AutoUpgradeMaxThroughputIncrementPercentage => this.Content?.OfferAutoscaleSettings?.AutoscaleAutoUpgradeProperties?.ThroughputProperties?.IncrementPercent;
 
         /// <summary>
@@ -148,35 +151,40 @@ namespace Microsoft.Azure.Cosmos
         /// A self-link is a static addressable Uri for each resource within a database account and follows the Azure Cosmos DB resource model.
         /// E.g. a self-link for a document could be dbs/db_resourceid/colls/coll_resourceid/documents/doc_resourceid
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.SelfLink, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.SelfLink)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string SelfLink { get; private set; }
 
         /// <summary>
         /// Gets the offer rid.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.RId, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.RId)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal string OfferRID { get; private set; }
 
         /// <summary>
         /// Gets the resource rid.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.OfferResourceId, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.OfferResourceId)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal string ResourceRID { get; private set; }
 
-        [JsonProperty(PropertyName = "content", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "content")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         internal OfferContentProperties Content { get; set; }
 
         /// <summary>
         /// Gets the version of this offer resource in the Azure Cosmos DB service.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.OfferVersion, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.OfferVersion)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         internal string OfferVersion { get; private set; }
 
         /// <summary>
         /// This contains additional values for scenarios where the SDK is not aware of new fields. 
         /// This ensures that if resource is read and updated none of the fields will be lost in the process.
         /// </summary>
-        [JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         internal IDictionary<string, JToken> AdditionalProperties { get; private set; }
     }
 }

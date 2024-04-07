@@ -30,8 +30,8 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// One of the values of the <see cref="T:Microsoft.Azure.Documents.IndexKind"/> enumeration.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.IndexKind)]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.IndexKind)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public IndexKind Kind { get; set; }
 
         /// <summary>

@@ -13,9 +13,6 @@ namespace Microsoft.Azure.Cosmos
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.ChangeFeed;
-    using Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing;
-    using Microsoft.Azure.Cosmos.ChangeFeed.Pagination;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.Json;
     using Microsoft.Azure.Cosmos.Linq;
@@ -385,26 +382,7 @@ namespace Microsoft.Azure.Cosmos
             QueryRequestOptions requestOptions = null,
             CosmosLinqSerializerOptions linqSerializerOptions = null)
         {
-            requestOptions ??= new QueryRequestOptions();
-
-            if (this.ClientContext.ClientOptions != null)
-            {
-                linqSerializerOptions ??= new CosmosLinqSerializerOptions
-                {
-                    PropertyNamingPolicy = this.ClientContext.ClientOptions.SerializerOptions?.PropertyNamingPolicy ?? CosmosPropertyNamingPolicy.Default             
-                };
-            }
-
-            CosmosLinqSerializerOptionsInternal linqSerializerOptionsInternal = CosmosLinqSerializerOptionsInternal.Create(linqSerializerOptions, this.ClientContext.ClientOptions.Serializer);
-
-            return new CosmosLinqQuery<T>(
-                this,
-                this.ClientContext.ResponseFactory,
-                (CosmosQueryClientCore)this.queryClient,
-                continuationToken,
-                requestOptions,
-                allowSynchronousQueryExecution,
-                linqSerializerOptionsInternal);
+            throw new Exception("No LINQ");
         }
 
         public override FeedIterator<T> GetItemQueryIterator<T>(
@@ -444,224 +422,9 @@ namespace Microsoft.Azure.Cosmos
                 requestOptions: requestOptions);
         }
 
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilder<T>(
-            string processorName,
-            ChangesHandler<T> onChangesDelegate)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (onChangesDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(onChangesDelegate));
-            }
-
-            ChangeFeedObserverFactory observerFactory = new CheckpointerObserverFactory(
-                new ChangeFeedObserverFactoryCore<T>(onChangesDelegate, this.ClientContext.SerializerCore),
-                withManualCheckpointing: false);
-            return this.GetChangeFeedProcessorBuilderPrivate(processorName,
-                observerFactory, ChangeFeedMode.LatestVersion);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilder<T>(
-            string processorName,
-            ChangeFeedHandler<T> onChangesDelegate)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (onChangesDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(onChangesDelegate));
-            }
-
-            ChangeFeedObserverFactory observerFactory = new CheckpointerObserverFactory(
-                new ChangeFeedObserverFactoryCore<T>(onChangesDelegate, this.ClientContext.SerializerCore),
-                withManualCheckpointing: false);
-            return this.GetChangeFeedProcessorBuilderPrivate(processorName,
-                observerFactory, ChangeFeedMode.LatestVersion);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilderWithManualCheckpoint<T>(
-            string processorName,
-            ChangeFeedHandlerWithManualCheckpoint<T> onChangesDelegate)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (onChangesDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(onChangesDelegate));
-            }
-
-            ChangeFeedObserverFactory observerFactory = new CheckpointerObserverFactory(
-                new ChangeFeedObserverFactoryCore<T>(onChangesDelegate, this.ClientContext.SerializerCore),
-                withManualCheckpointing: true);
-            return this.GetChangeFeedProcessorBuilderPrivate(processorName,
-                observerFactory, ChangeFeedMode.LatestVersion);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilder(
-            string processorName,
-            ChangeFeedStreamHandler onChangesDelegate)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (onChangesDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(onChangesDelegate));
-            }
-
-            ChangeFeedObserverFactory observerFactory = new CheckpointerObserverFactory(
-                new ChangeFeedObserverFactoryCore(onChangesDelegate),
-                withManualCheckpointing: false);
-            return this.GetChangeFeedProcessorBuilderPrivate(processorName,
-                observerFactory, ChangeFeedMode.LatestVersion);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilderWithManualCheckpoint(
-            string processorName,
-            ChangeFeedStreamHandlerWithManualCheckpoint onChangesDelegate)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (onChangesDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(onChangesDelegate));
-            }
-
-            ChangeFeedObserverFactory observerFactory = new CheckpointerObserverFactory(
-                new ChangeFeedObserverFactoryCore(onChangesDelegate),
-                withManualCheckpointing: true);
-            return this.GetChangeFeedProcessorBuilderPrivate(processorName,
-                observerFactory,
-                ChangeFeedMode.LatestVersion);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedEstimatorBuilder(
-            string processorName,
-            ChangesEstimationHandler estimationDelegate,
-            TimeSpan? estimationPeriod = null)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (estimationDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(estimationDelegate));
-            }
-
-            ChangeFeedEstimatorRunner changeFeedEstimatorCore = new ChangeFeedEstimatorRunner(estimationDelegate, estimationPeriod);
-            return new ChangeFeedProcessorBuilder(
-                processorName: processorName,
-                container: this,
-                changeFeedProcessor: changeFeedEstimatorCore,
-                applyBuilderConfiguration: changeFeedEstimatorCore.ApplyBuildConfiguration);
-        }
-
-        public override ChangeFeedEstimator GetChangeFeedEstimator(
-            string processorName,
-            Container leaseContainer)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (leaseContainer == null)
-            {
-                throw new ArgumentNullException(nameof(leaseContainer));
-            }
-
-            return new ChangeFeedEstimatorCore(
-                processorName: processorName,
-                monitoredContainer: this,
-                leaseContainer: (ContainerInternal)leaseContainer,
-                documentServiceLeaseContainer: default);
-        }
-
         public override TransactionalBatch CreateTransactionalBatch(PartitionKey partitionKey)
         {
             return new BatchCore(this, partitionKey);
-        }
-
-        public override IAsyncEnumerable<TryCatch<ChangeFeed.ChangeFeedPage>> GetChangeFeedAsyncEnumerable(
-            ChangeFeedCrossFeedRangeState state,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedRequestOptions changeFeedRequestOptions = default)
-        {
-            NetworkAttachedDocumentContainer networkAttachedDocumentContainer = new NetworkAttachedDocumentContainer(
-                this,
-                this.queryClient,
-                Guid.NewGuid(),
-                changeFeedRequestOptions: changeFeedRequestOptions);
-            DocumentContainer documentContainer = new DocumentContainer(networkAttachedDocumentContainer);
-
-            Dictionary<string, string> additionalHeaders;
-            
-            if ((changeFeedRequestOptions?.Properties != null) && changeFeedRequestOptions.Properties.Any())
-            {
-                Dictionary<string, object> additionalNonStringHeaders = new Dictionary<string, object>();
-                additionalHeaders = new Dictionary<string, string>();
-                foreach (KeyValuePair<string, object> keyValuePair in changeFeedRequestOptions.Properties)
-                {
-                    if (keyValuePair.Value is string stringValue)
-                    {
-                        additionalHeaders[keyValuePair.Key] = stringValue;
-                    }
-                    else
-                    {
-                        additionalNonStringHeaders[keyValuePair.Key] = keyValuePair.Value;
-                    }
-                }
-
-                changeFeedRequestOptions.Properties = additionalNonStringHeaders;
-            }
-            else
-            {
-                additionalHeaders = null;
-            }
-
-            ChangeFeedPaginationOptions changeFeedPaginationOptions = new ChangeFeedPaginationOptions(
-                changeFeedMode,
-                changeFeedRequestOptions?.PageSizeHint,
-                changeFeedRequestOptions?.JsonSerializationFormatOptions?.JsonSerializationFormat,
-                additionalHeaders);
-
-            return new ChangeFeedCrossFeedRangeAsyncEnumerable(
-                documentContainer,
-                state,
-                changeFeedPaginationOptions,
-                changeFeedRequestOptions?.JsonSerializationFormatOptions);
-        }
-
-        public override FeedIterator GetStandByFeedIterator(
-            string continuationToken = null,
-            int? maxItemCount = null,
-            StandByFeedIteratorRequestOptions requestOptions = null)
-        {
-            StandByFeedIteratorRequestOptions cosmosQueryRequestOptions = requestOptions ?? new StandByFeedIteratorRequestOptions();
-
-            return new StandByFeedIteratorCore(
-                clientContext: this.ClientContext,
-                continuationToken: continuationToken,
-                maxItemCount: maxItemCount,
-                container: this,
-                options: cosmosQueryRequestOptions);
         }
 
         /// <summary>
@@ -1218,40 +981,6 @@ namespace Microsoft.Azure.Cosmos
                 requestOptions: requestOptions,
                 trace: trace,
                 cancellationToken: cancellationToken);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilderWithAllVersionsAndDeletes<T>(
-            string processorName,
-            ChangeFeedHandler<ChangeFeedItem<T>> onChangesDelegate)
-        {
-            if (processorName == null)
-            {
-                throw new ArgumentNullException(nameof(processorName));
-            }
-
-            if (onChangesDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(onChangesDelegate));
-            }
-
-            ChangeFeedObserverFactory observerFactory = new CheckpointerObserverFactory(
-                new ChangeFeedObserverFactoryCore<T>(onChangesDelegate, this.ClientContext.SerializerCore),
-                withManualCheckpointing: false);
-            return this.GetChangeFeedProcessorBuilderPrivate(processorName,
-                observerFactory, ChangeFeedMode.AllVersionsAndDeletes);
-        }
-
-        private ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilderPrivate(
-            string processorName,
-            ChangeFeedObserverFactory observerFactory,
-            ChangeFeedMode mode)
-        {
-            ChangeFeedProcessorCore changeFeedProcessor = new ChangeFeedProcessorCore(observerFactory);
-            return new ChangeFeedProcessorBuilder(
-                processorName: processorName,
-                container: this,
-                changeFeedProcessor: changeFeedProcessor,
-                applyBuilderConfiguration: changeFeedProcessor.ApplyBuildConfiguration).WithChangeFeedMode(mode);
         }
     }
 }

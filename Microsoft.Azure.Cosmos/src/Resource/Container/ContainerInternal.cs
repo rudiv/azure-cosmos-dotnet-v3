@@ -9,7 +9,6 @@ namespace Microsoft.Azure.Cosmos
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.ChangeFeed;
     using Microsoft.Azure.Cosmos.Query;
     using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
@@ -65,11 +64,6 @@ namespace Microsoft.Azure.Cosmos
 
         public abstract Task<CollectionRoutingMap> GetRoutingMapAsync(CancellationToken cancellationToken);
 
-        public abstract FeedIterator GetStandByFeedIterator(
-            string continuationToken = default,
-            int? maxItemCount = default,
-            StandByFeedIteratorRequestOptions requestOptions = default);
-
         public abstract FeedIteratorInternal GetItemQueryStreamIteratorInternal(
             SqlQuerySpec sqlQuerySpec,
             bool isContinuationExcpected,
@@ -89,11 +83,6 @@ namespace Microsoft.Azure.Cosmos
             Stream stream,
             ITrace trace,
             CancellationToken cancellation);
-
-        public abstract IAsyncEnumerable<TryCatch<ChangeFeedPage>> GetChangeFeedAsyncEnumerable(
-            ChangeFeedCrossFeedRangeState state,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedRequestOptions changeFeedRequestOptions = null);
 
         public abstract IAsyncEnumerable<TryCatch<ReadFeedPage>> GetReadFeedAsyncEnumerable(
             ReadFeedCrossFeedRangeState state,
@@ -147,10 +136,6 @@ namespace Microsoft.Azure.Cosmos
         public abstract Task<IEnumerable<string>> GetPartitionKeyRangesAsync(
             FeedRange feedRange,
             CancellationToken cancellationToken = default);
-
-        public abstract ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilderWithAllVersionsAndDeletes<T>(
-            string processorName,
-            ChangeFeedHandler<ChangeFeedItem<T>> onChangesDelegate);
 #endif
 
         public abstract class TryExecuteQueryResult
@@ -186,17 +171,5 @@ namespace Microsoft.Azure.Cosmos
 
             public QueryIterator QueryIterator { get; }
         }
-
-        public abstract FeedIterator GetChangeFeedStreamIteratorWithQuery(
-            ChangeFeedStartFrom changeFeedStartFrom,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedQuerySpec changeFeedQuerySpec,
-            ChangeFeedRequestOptions changeFeedRequestOptions = null);
-
-        public abstract FeedIterator<T> GetChangeFeedIteratorWithQuery<T>(
-           ChangeFeedStartFrom changeFeedStartFrom,
-           ChangeFeedMode changeFeedMode,
-           ChangeFeedQuerySpec changeFeedQuerySpec,
-           ChangeFeedRequestOptions changeFeedRequestOptions = null);
     }
 }

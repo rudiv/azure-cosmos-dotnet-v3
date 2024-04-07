@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos
 #endif
     sealed class ChangeFeedPolicy
     {
-        [JsonProperty(PropertyName = Constants.Properties.LogRetentionDuration)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.LogRetentionDuration)]
         private int retentionDurationInMinutes = 0;
 
         /// <summary>

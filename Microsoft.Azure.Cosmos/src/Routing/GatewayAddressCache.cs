@@ -409,7 +409,7 @@ namespace Microsoft.Azure.Cosmos.Routing
                     bool inNetworkRequest = this.IsInNetworkRequest(response);
 
                     IEnumerable<Tuple<PartitionKeyRangeIdentity, PartitionAddressInformation>> addressInfos =
-                        addressFeed.Where(addressInfo => ProtocolFromString(addressInfo.Protocol) == this.protocol)
+                        addressFeed.InnerCollection.Where(addressInfo => ProtocolFromString(addressInfo.Protocol) == this.protocol)
                             .GroupBy(address => address.PartitionKeyRangeId, StringComparer.Ordinal)
                             .Select(group => this.ToPartitionAddressAndRange(containerProperties.ResourceId, @group.ToList(), inNetworkRequest));
 
@@ -574,7 +574,7 @@ namespace Microsoft.Azure.Cosmos.Routing
 
                         bool inNetworkRequest = this.IsInNetworkRequest(response);
 
-                        masterAddressAndRange = this.ToPartitionAddressAndRange(string.Empty, masterAddresses.ToList(), inNetworkRequest);
+                        masterAddressAndRange = this.ToPartitionAddressAndRange(string.Empty, masterAddresses.InnerCollection.ToList(), inNetworkRequest);
                         this.masterPartitionAddressCache = masterAddressAndRange;
                         this.suboptimalMasterPartitionTimestamp = DateTime.MaxValue;
                     }
@@ -609,7 +609,7 @@ namespace Microsoft.Azure.Cosmos.Routing
                 bool inNetworkRequest = this.IsInNetworkRequest(response);
 
                 IEnumerable<Tuple<PartitionKeyRangeIdentity, PartitionAddressInformation>> addressInfos =
-                    addressFeed.Where(addressInfo => ProtocolFromString(addressInfo.Protocol) == this.protocol)
+                    addressFeed.InnerCollection.Where(addressInfo => ProtocolFromString(addressInfo.Protocol) == this.protocol)
                         .GroupBy(address => address.PartitionKeyRangeId, StringComparer.Ordinal)
                         .Select(group => this.ToPartitionAddressAndRange(collectionRid, @group.ToList(), inNetworkRequest));
 

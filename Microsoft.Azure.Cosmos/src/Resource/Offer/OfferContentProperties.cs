@@ -6,8 +6,9 @@ namespace Microsoft.Azure.Cosmos
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using Microsoft.Azure.Documents;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     internal class OfferContentProperties
@@ -15,7 +16,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Default constructor for serialization
         /// </summary>
-        [JsonConstructor]
+        [Newtonsoft.Json.JsonConstructor]
         internal OfferContentProperties()
         {
         }
@@ -35,25 +36,29 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Represents customizable throughput chosen by user for his collection in the Azure Cosmos DB service.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.OfferThroughput, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.OfferThroughput)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int? OfferThroughput { get; private set; }
 
         /// <summary>
         /// Represents customizable throughput chosen by user for his collection in the Azure Cosmos DB service.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.AutopilotSettings, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.AutopilotSettings)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public OfferAutoscaleProperties OfferAutoscaleSettings { get; private set; }
 
         /// <summary>
         /// Represents Request Units(RU)/Minute throughput is enabled/disabled for collection in the Azure Cosmos DB service.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.OfferIsRUPerMinuteThroughputEnabled, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.OfferIsRUPerMinuteThroughputEnabled)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool? OfferIsRUPerMinuteThroughputEnabled { get; private set; }
 
         /// <summary>
         /// Represents time stamp when offer was last replaced by user for collection in the Azure Cosmos DB service.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.OfferLastReplaceTimestamp, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.OfferLastReplaceTimestamp)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         internal long? OfferLastReplaceTimestamp { get; private set; }
 
         /// <summary>
@@ -61,7 +66,7 @@ namespace Microsoft.Azure.Cosmos
         /// This ensures that if resource is read and updated none of the fields will be lost in the process.
         /// </summary>
         [JsonExtensionData]
-        internal IDictionary<string, JToken> AdditionalProperties { get; private set; }
+        internal IDictionary<string, JsonElement> AdditionalProperties { get; private set; }
 
         public static OfferContentProperties CreateManualOfferConent(int throughput)
         {

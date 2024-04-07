@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Cosmos.Pagination
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.ChangeFeed.Pagination;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Query.Core.Pipeline.Pagination;
@@ -16,8 +15,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
     internal interface IMonadicDocumentContainer :
         IMonadicFeedRangeProvider,  
         IMonadicQueryDataSource, 
-        IMonadicReadFeedDataSource, 
-        IMonadicChangeFeedDataSource
+        IMonadicReadFeedDataSource
     {
         Task<TryCatch<Record>> MonadicCreateItemAsync(
             CosmosObject payload,

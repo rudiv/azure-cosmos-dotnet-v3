@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Cosmos
         ///  '/', '\\', '?', '#'
         /// </para>
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.Id)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Id)]
         public string Id { get; private set; }
 
         /// <summary> 
@@ -94,7 +94,7 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// The-uri of the resource to which the permission applies.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.ResourceLink)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ResourceLink)]
         public string ResourceUri { get; private set; }
 
         /// <summary>
@@ -139,8 +139,8 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// The <see cref="PermissionMode"/> mode: Read or All.
         /// </value>
-        [JsonConverter(typeof(StringEnumConverter))]
-        [JsonProperty(PropertyName = Constants.Properties.PermissionMode)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.PermissionMode)]
         public PermissionMode PermissionMode { get; private set; }
 
         /// <summary>
@@ -149,7 +149,8 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// The access token granting the defined permission.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.Token, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Token)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Token { get; private set; }
 
         /// <summary>
@@ -161,7 +162,8 @@ namespace Microsoft.Azure.Cosmos
         /// <remarks>
         /// ETags are used for concurrency checking when updating resources. 
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.ETag, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ETag)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string ETag { get; private set; }
 
         /// <summary>
@@ -170,7 +172,8 @@ namespace Microsoft.Azure.Cosmos
         /// <value>The last modified time stamp associated with the resource.</value>
         /// <remarks>ResourceToken generation and reading does not apply.</remarks>
         [JsonConverter(typeof(UnixDateTimeConverter))]
-        [JsonProperty(PropertyName = Constants.Properties.LastModified, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.LastModified)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public DateTime? LastModified { get; private set; }
 
         /// <summary>
@@ -181,7 +184,8 @@ namespace Microsoft.Azure.Cosmos
         /// A self-link is a static addressable Uri for each resource within a database account and follows the Azure Cosmos DB resource model.
         /// E.g. a self-link for a document could be dbs/db_resourceid/colls/coll_resourceid/documents/doc_resourceid
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.SelfLink, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.SelfLink)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string SelfLink { get; private set; }
 
         /// <summary>
@@ -195,10 +199,12 @@ namespace Microsoft.Azure.Cosmos
         /// resource whether that is a database, a collection or a document.
         /// These resource ids are used when building up SelfLinks, a static addressable Uri for each resource within a database account.
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.RId, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.RId)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal string ResourceId { get; private set; }
 
-        [JsonProperty(PropertyName = Constants.Properties.ResourcePartitionKey, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ResourcePartitionKey)]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal Documents.Routing.PartitionKeyInternal InternalResourcePartitionKey { get; private set; }
 
         /// <summary>

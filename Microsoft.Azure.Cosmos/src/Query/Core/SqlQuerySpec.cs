@@ -2,16 +2,22 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
 
+using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Azure.Cosmos.Query.Core;
+
 namespace Microsoft.Azure.Cosmos.Query.Core
 {
     using System;
     using System.Runtime.Serialization;
+    using System.Text.Json.Serialization;
 
     /// <summary>
     /// Represents a SQL query in the Azure Cosmos DB service.
     /// </summary>
-    [DataContract]
-    internal sealed class SqlQuerySpec
+    [JsonConverter(typeof(IgnoreEmptyParametersConverter))]
+    public sealed class SqlQuerySpec
     {
         private SqlParameterCollection parameters;
 
@@ -61,37 +67,62 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// Gets or sets the text of the Azure Cosmos DB database query.
         /// </summary>
         /// <value>The text of the database query.</value>
-        [DataMember(Name = "query")]
+        [JsonPropertyName("query")]
         public string QueryText { get; set; }
 
         /// <summary>
         /// Gets or sets the ClientQL Compatibility Level supported by the client.
         /// </summary>
         /// <value>The integer value representing the compatibility of the client.</value>
-        [DataMember(Name = "clientQLCompatibilityLevel", EmitDefaultValue = false)]
+        [JsonPropertyName("clientQLCompatibilityLevel")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int? ClientQLCompatibilityLevel { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="T:Microsoft.Azure.Documents.SqlParameterCollection"/> instance, which represents the collection of Azure Cosmos DB query parameters.
         /// </summary>
         /// <value>The <see cref="T:Microsoft.Azure.Documents.SqlParameterCollection"/> instance.</value>
-        [DataMember(Name = "parameters")]
+        [JsonPropertyName("parameters")]
         public SqlParameterCollection Parameters
         {
             get => this.parameters;
             set => this.parameters = value ?? throw new ArgumentNullException("value");
         }
 
-        [DataMember(Name = "resumeFilter", EmitDefaultValue = false)]
+        [JsonPropertyName("resumeFilter")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public SqlQueryResumeFilter ResumeFilter { get; set; }
+    }
+}
 
-        /// <summary>
-        /// Returns a value that indicates whether the Azure Cosmos DB database <see cref="Parameters"/> property should be serialized.
-        /// </summary>
-        public bool ShouldSerializeParameters()
+public class IgnoreEmptyParametersConverter : JsonConverter<SqlQuerySpec>
+{
+    public override SqlQuerySpec Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return JsonSerializer.Deserialize<SqlQuerySpec>(ref reader, options);
+    }
+
+    public override void Write(Utf8JsonWriter writer, SqlQuerySpec value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        writer.WriteString("query", value.QueryText);
+        if (value.ClientQLCompatibilityLevel.HasValue && value.ClientQLCompatibilityLevel.Value != default)
         {
-            return this.parameters.Count > 0;
+            writer.WriteNumber("clientQLCompatibilityLevel", value.ClientQLCompatibilityLevel.Value);
         }
 
+        if (value.Parameters != null && value.Parameters.Count > 0)
+        {
+            writer.WritePropertyName("parameters");
+            JsonSerializer.Serialize(writer, value.Parameters, options);
+        }
+        
+        if (value.ResumeFilter != null)
+        {
+            writer.WritePropertyName("resumeFilter");
+            JsonSerializer.Serialize(writer, value.ResumeFilter, options);
+        }
+
+        writer.WriteEndObject();
     }
 }

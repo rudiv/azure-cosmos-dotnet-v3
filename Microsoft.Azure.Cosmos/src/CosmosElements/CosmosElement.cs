@@ -10,7 +10,6 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
     using System.Text;
     using Microsoft.Azure.Cosmos.CosmosElements.Numbers;
     using Microsoft.Azure.Cosmos.Json;
-    using Microsoft.Azure.Cosmos.Json.Interop;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
 
     [Newtonsoft.Json.JsonConverter(typeof(CosmosElementJsonConverter))]
@@ -19,9 +18,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1600 // Elements should be documented
     public
 #else
-    internal
-#endif
-    abstract class CosmosElement : IEquatable<CosmosElement>, IComparable<CosmosElement>
+    #endif
+        public abstract class CosmosElement : IEquatable<CosmosElement>, IComparable<CosmosElement>
     {
         protected static readonly Newtonsoft.Json.JsonSerializer DefaultSerializer = new Newtonsoft.Json.JsonSerializer()
         {
@@ -41,19 +39,19 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return Utf8StringHelpers.ToString(jsonWriter.GetResult());
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is CosmosElement cosmosElement && this.Equals(cosmosElement);
         }
 
-        public abstract bool Equals(CosmosElement cosmosElement);
+        public abstract bool Equals(CosmosElement? cosmosElement);
 
         public abstract override int GetHashCode();
 
-        public int CompareTo(CosmosElement other)
+        public int CompareTo(CosmosElement? other)
         {
             int thisTypeOrder = this.Accept(CosmosElementToTypeOrder.Singleton);
-            int otherTypeOrder = other.Accept(CosmosElementToTypeOrder.Singleton);
+            int otherTypeOrder = other!.Accept(CosmosElementToTypeOrder.Singleton);
 
             if (thisTypeOrder != otherTypeOrder)
             {
@@ -75,9 +73,10 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         public virtual T Materialize<T>()
         {
             Cosmos.Json.IJsonReader cosmosJsonReader = this.CreateReader();
-            Newtonsoft.Json.JsonReader newtonsoftReader = new CosmosDBToNewtonsoftReader(cosmosJsonReader);
 
-            return DefaultSerializer.Deserialize<T>(newtonsoftReader);
+            throw new NotImplementedException();
+            /*
+            return DefaultSerializer.Deserialize<T>(newtonsoftReader);*/
         }
 
         public virtual IJsonReader CreateReader()

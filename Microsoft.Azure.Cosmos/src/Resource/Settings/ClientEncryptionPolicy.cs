@@ -81,7 +81,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Paths of the item that need encryption along with path-specific settings. 
         /// </summary>
-        [JsonProperty(PropertyName = "includedPaths")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "includedPaths")]
         public IEnumerable<ClientEncryptionIncludedPath> IncludedPaths
         {
             get; private set;
@@ -90,7 +90,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Version of the client encryption policy definition.
         /// </summary>
-        [JsonProperty(PropertyName = "policyFormatVersion")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "policyFormatVersion")]
         public int PolicyFormatVersion { get; private set; }
 
         /// <summary>

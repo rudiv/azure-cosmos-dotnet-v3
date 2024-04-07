@@ -8,15 +8,17 @@ namespace Microsoft.Azure.Cosmos
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text.Json.Serialization;
     using Microsoft.Azure.Cosmos.Query.Core;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Defines a Cosmos SQL query
     /// </summary>
     public class QueryDefinition
     {
-        [JsonProperty(PropertyName = "parameters", NullValueHandling = NullValueHandling.Ignore, Order = 1)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "parameters")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyOrder(1)]
         private List<SqlParameter> parameters { get; set; }
 
         private ParametersListAdapter parametersAdapter;
@@ -48,7 +50,8 @@ namespace Microsoft.Azure.Cosmos
         /// Gets the text of the Azure Cosmos DB SQL query.
         /// </summary>
         /// <value>The text of the SQL query.</value>
-        [JsonProperty(PropertyName = "query", Order = 0)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "query")]
+        [JsonPropertyOrder(0)]
         public string QueryText { get; }
 
         internal static QueryDefinition CreateFromQuerySpec(SqlQuerySpec sqlQuery)
@@ -166,7 +169,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets the sql parameters for the class
         /// </summary>
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         internal IReadOnlyList<SqlParameter> Parameters => this.parameters ?? (IReadOnlyList<SqlParameter>)Array.Empty<SqlParameter>();
 
         private class ParametersListAdapter : IReadOnlyList<(string Name, object Value)>

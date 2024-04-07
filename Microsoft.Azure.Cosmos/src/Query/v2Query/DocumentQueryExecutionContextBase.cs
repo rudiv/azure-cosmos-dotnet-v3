@@ -132,18 +132,7 @@ namespace Microsoft.Azure.Cosmos.Query
         {
             get
             {
-                if (!this.isExpressionEvaluated)
-                {
-                    LinqQueryOperation linqQuery = DocumentQueryEvaluator.Evaluate(this.expression);
-
-                    if (linqQuery.ScalarOperationKind != ScalarOperationKind.None)
-                    {
-                        throw new NotSupportedException($"This operation does not support the supplied LINQ expression since it involves client side operation : {linqQuery.ScalarOperationKind}");
-                    }
-
-                    this.querySpec = linqQuery.SqlQuerySpec;
-                    this.isExpressionEvaluated = true;
-                }
+                throw new NotImplementedException();
 
                 return this.querySpec;
             }
@@ -557,11 +546,11 @@ namespace Microsoft.Azure.Cosmos.Query
             DocumentServiceRequest request = querySpec != null ?
                 this.CreateQueryDocumentServiceRequest(requestHeaders, querySpec) :
                 this.CreateReadFeedDocumentServiceRequest(requestHeaders);
-
+/*
             if (this.feedOptions.JsonSerializerSettings != null)
             {
-                request.SerializerSettings = this.feedOptions.JsonSerializerSettings;
-            }
+                //request.SerializerSettings = this.feedOptions.JsonSerializerSettings;
+            }*/
 
             return request;
         }

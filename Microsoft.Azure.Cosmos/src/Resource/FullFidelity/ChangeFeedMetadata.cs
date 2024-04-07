@@ -5,8 +5,8 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Text.Json.Serialization;
     using Microsoft.Azure.Documents;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
     /// <summary>
@@ -41,33 +41,37 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// The conflict resolution timestamp.
         /// </summary>
-        [JsonProperty(PropertyName = "crts", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonConverter(typeof(UnixDateTimeConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "crts")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonConverter(typeof(UnixDateTimeConverter))]
         public DateTime ConflictResolutionTimestamp { get; }
 
         /// <summary>
         /// The current logical sequence number.
         /// </summary>
-        [JsonProperty(PropertyName = "lsn", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "lsn")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public long Lsn { get; }
 
         /// <summary>
         /// The change feed operation type.
         /// </summary>
-        [JsonProperty(PropertyName = "operationType")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "operationType")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public ChangeFeedOperationType OperationType { get; }
 
         /// <summary>
         /// The previous logical sequence number.
         /// </summary>
-        [JsonProperty(PropertyName = "previousImageLSN", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "previousImageLSN")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public long PreviousLsn { get; }
 
         /// <summary>
         /// Used to distinquish explicit deletes (e.g. via DeleteItem) from deletes caused by TTL expiration (a collection may define time-to-live policy for documents).
         /// </summary>
-        [JsonProperty(PropertyName = "timeToLiveExpired", NullValueHandling= NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "timeToLiveExpired")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool IsTimeToLiveExpired { get; }
     }
 }

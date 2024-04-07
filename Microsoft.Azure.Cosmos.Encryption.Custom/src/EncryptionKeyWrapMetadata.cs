@@ -59,10 +59,12 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
             this.Name = name;
         }
 
-        [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "type")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal string Type { get; private set; }
 
-        [JsonProperty(PropertyName = "algorithm", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "algorithm")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal string Algorithm { get; private set; }
 
         /// <summary>
@@ -70,7 +72,8 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
         /// Note: This name is saved in the Cosmos DB service.
         /// Implementors of derived implementations should ensure that this does not have (private) key material or credential information.
         /// </summary>
-        [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "name")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Name { get; private set; }
 
         /// <summary>
@@ -78,7 +81,8 @@ namespace Microsoft.Azure.Cosmos.Encryption.Custom
         /// Note: This value is saved in the Cosmos DB service.
         /// Implementors of derived implementations should ensure that this does not have (private) key material or credential information.
         /// </summary>
-        [JsonProperty(PropertyName = "value", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "value")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Value { get; private set; }
 
         /// <inheritdoc/>

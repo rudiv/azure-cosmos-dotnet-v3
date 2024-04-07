@@ -43,8 +43,8 @@ namespace Microsoft.Azure.Cosmos
         /// The data type for which this index should be applied.
         /// </value>
         /// <seealso href="https://docs.microsoft.com/azure/cosmos-db/index-policy"/>
-        [JsonProperty(PropertyName = Constants.Properties.DataType)]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.DataType)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public DataType DataType { get; set; }
     }
 }

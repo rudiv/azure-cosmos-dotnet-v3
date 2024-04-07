@@ -16,7 +16,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
     internal sealed class QueryInfo
     {
         [JsonProperty("distinctType")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public DistinctQueryType DistinctType
         {
             get;

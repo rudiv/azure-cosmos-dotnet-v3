@@ -47,11 +47,7 @@ namespace Microsoft.Azure.Cosmos
                 // load resource
                 if (typeof(TValue) == typeof(Document) || typeof(Document).IsAssignableFrom(typeof(TValue)))
                 {
-                    this.responseBody = Documents.Resource.LoadFromWithConstructor<TValue>(response.ResponseBody, () => (TValue)(object)new Document(), this.serializerSettings);
-                }
-                else if (typeof(TValue) == typeof(Attachment) || typeof(Attachment).IsAssignableFrom(typeof(TValue)))
-                {
-                    this.responseBody = Documents.Resource.LoadFromWithConstructor<TValue>(response.ResponseBody, () => (TValue)(object)new Attachment(), this.serializerSettings);
+                    //this.responseBody = Documents.Resource.LoadFromWithConstructor<TValue>(response.ResponseBody, () => (TValue)(object)new Document(), this.serializerSettings);
                 }
                 else
                 {
@@ -67,17 +63,9 @@ namespace Microsoft.Azure.Cosmos
                 using (StreamReader responseReader = new StreamReader(response.ResponseBody ?? responseStream))
                 {
                     string responseString = responseReader.ReadToEnd();
-                    try
-                    {
-                        this.responseBody = (TValue)JsonConvert.DeserializeObject(responseString, typeof(TValue), this.serializerSettings);
-                    }
-                    catch (JsonException ex)
-                    {
                         // Don't expose JsonNewton exceptions to the user, convert to appropriate .net exception.
                         throw new SerializationException(
-                            string.Format(CultureInfo.InvariantCulture, "Failed to deserialize stored procedure response or convert it to type '{0}': {1}", typeof(TValue).FullName, ex.Message),
-                            ex);
-                    }
+                            string.Format(CultureInfo.InvariantCulture, "Failed to deserialize stored procedure response or convert it to type '{0}'", typeof(TValue).FullName));
                 }
             }
         }

@@ -16,9 +16,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1601 // Partial elements should be documented
     public
 #else
-    internal
-#endif
-    abstract partial class CosmosString : CosmosElement, IEquatable<CosmosString>, IComparable<CosmosString>
+    #endif
+        public abstract partial class CosmosString : CosmosElement, IEquatable<CosmosString>, IComparable<CosmosString>
     {
         public static CosmosString Empty = new EagerCosmosString(string.Empty);
 
@@ -46,14 +45,14 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return cosmosElementVisitor.Visit(this, input);
         }
 
-        public override bool Equals(CosmosElement cosmosElement)
+        public override bool Equals(CosmosElement? cosmosElement)
         {
             return cosmosElement is CosmosString cosmosString && this.Equals(cosmosString);
         }
 
-        public bool Equals(CosmosString cosmosString)
+        public bool Equals(CosmosString? cosmosString)
         {
-            return this.Value == cosmosString.Value;
+            return this.Value == cosmosString!.Value;
         }
 
         public override int GetHashCode()
@@ -64,9 +63,9 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return (int)hash;
         }
 
-        public int CompareTo(CosmosString cosmosString)
+        public int CompareTo(CosmosString? cosmosString)
         {
-            return string.CompareOrdinal(this.Value, cosmosString.Value);
+            return string.CompareOrdinal(this.Value, cosmosString?.Value);
         }
 
         public static CosmosString Create(

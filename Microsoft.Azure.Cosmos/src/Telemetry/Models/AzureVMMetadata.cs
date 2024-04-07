@@ -15,7 +15,7 @@ namespace Microsoft.Azure.Cosmos.Telemetry.Models
             this.Compute = compute;
         }
 
-        [JsonProperty(PropertyName = "compute")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "compute")]
         internal Compute Compute { get; }
     }
 }

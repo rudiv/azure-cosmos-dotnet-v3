@@ -10,9 +10,6 @@ namespace Microsoft.Azure.Cosmos
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.ChangeFeed;
-    using Microsoft.Azure.Cosmos.ChangeFeed.Pagination;
-    using Microsoft.Azure.Cosmos.ChangeFeed.Utils;
     using Microsoft.Azure.Cosmos.Diagnostics;
     using Microsoft.Azure.Cosmos.Pagination;
     using Microsoft.Azure.Cosmos.Query.Core;
@@ -316,72 +313,6 @@ namespace Microsoft.Azure.Cosmos
             return feedTokens;
         }
 
-        public override FeedIterator GetChangeFeedStreamIterator(
-            ChangeFeedStartFrom changeFeedStartFrom,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedRequestOptions changeFeedRequestOptions = null)
-        {
-            if (changeFeedStartFrom == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedStartFrom));
-            }
-
-            if (changeFeedMode == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedMode));
-            }
-
-            NetworkAttachedDocumentContainer networkAttachedDocumentContainer = new NetworkAttachedDocumentContainer(
-                this,
-                this.queryClient,
-                correlatedActivityId: Guid.NewGuid(),
-                changeFeedRequestOptions: changeFeedRequestOptions);
-            DocumentContainer documentContainer = new DocumentContainer(networkAttachedDocumentContainer);
-
-            return new ChangeFeedIteratorCore(
-                documentContainer: documentContainer,
-                changeFeedStartFrom: changeFeedStartFrom,
-                changeFeedMode: changeFeedMode,
-                changeFeedRequestOptions: changeFeedRequestOptions,
-                clientContext: this.ClientContext,
-                container: this);
-        }
-
-        public override FeedIterator<T> GetChangeFeedIterator<T>(
-            ChangeFeedStartFrom changeFeedStartFrom,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedRequestOptions changeFeedRequestOptions = null)
-        {
-            if (changeFeedStartFrom == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedStartFrom));
-            }
-
-            if (changeFeedMode == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedMode));
-            }
-
-            NetworkAttachedDocumentContainer networkAttachedDocumentContainer = new NetworkAttachedDocumentContainer(
-                this,
-                this.queryClient,
-                Guid.NewGuid(),
-                changeFeedRequestOptions: changeFeedRequestOptions);
-            DocumentContainer documentContainer = new DocumentContainer(networkAttachedDocumentContainer);
-
-            ChangeFeedIteratorCore changeFeedIteratorCore = new ChangeFeedIteratorCore(
-                documentContainer: documentContainer,
-                changeFeedStartFrom: changeFeedStartFrom,
-                changeFeedMode: changeFeedMode,
-                changeFeedRequestOptions: changeFeedRequestOptions,
-                container: this,
-                clientContext: this.ClientContext);
-
-            return new FeedIteratorCore<T>(
-                changeFeedIteratorCore,
-                responseCreator: this.ClientContext.ResponseFactory.CreateChangeFeedUserTypeResponse<T>);
-        }
-
         internal async Task<IEnumerable<string>> GetPartitionKeyRangesAsync(
             FeedRange feedRange,
             ITrace trace,
@@ -629,76 +560,6 @@ namespace Microsoft.Azure.Cosmos
               requestEnricher: null,
               trace: trace,
               cancellationToken: cancellationToken);
-        }
-
-        public override FeedIterator GetChangeFeedStreamIteratorWithQuery(
-           ChangeFeedStartFrom changeFeedStartFrom,
-           ChangeFeedMode changeFeedMode,
-           ChangeFeedQuerySpec changeFeedQuerySpec,
-           ChangeFeedRequestOptions changeFeedRequestOptions = null)
-        {
-            if (changeFeedStartFrom == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedStartFrom));
-            }
-
-            if (changeFeedMode == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedMode));
-            }
-
-            NetworkAttachedDocumentContainer networkAttachedDocumentContainer = new NetworkAttachedDocumentContainer(
-                this,
-                this.queryClient,
-                correlatedActivityId: Guid.NewGuid(),
-                changeFeedRequestOptions: changeFeedRequestOptions);
-            DocumentContainer documentContainer = new DocumentContainer(networkAttachedDocumentContainer);
-
-            return new ChangeFeedIteratorCore(
-                documentContainer: documentContainer,
-                changeFeedStartFrom: changeFeedStartFrom,
-                changeFeedMode: changeFeedMode,
-                changeFeedRequestOptions: changeFeedRequestOptions,
-                clientContext: this.ClientContext,
-                changeFeedQuerySpec: changeFeedQuerySpec,
-                container: this);
-        }
-
-        public override FeedIterator<T> GetChangeFeedIteratorWithQuery<T>(
-           ChangeFeedStartFrom changeFeedStartFrom,
-           ChangeFeedMode changeFeedMode,
-           ChangeFeedQuerySpec changeFeedQuerySpec,
-           ChangeFeedRequestOptions changeFeedRequestOptions = null)
-        {
-            if (changeFeedStartFrom == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedStartFrom));
-            }
-
-            if (changeFeedMode == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedMode));
-            }
-
-            NetworkAttachedDocumentContainer networkAttachedDocumentContainer = new NetworkAttachedDocumentContainer(
-                this,
-                this.queryClient,
-                Guid.NewGuid(),
-                changeFeedRequestOptions: changeFeedRequestOptions);
-            DocumentContainer documentContainer = new DocumentContainer(networkAttachedDocumentContainer);
-
-            ChangeFeedIteratorCore changeFeedIteratorCore = new ChangeFeedIteratorCore(
-                documentContainer: documentContainer,
-                changeFeedStartFrom: changeFeedStartFrom,
-                changeFeedMode: changeFeedMode,
-                changeFeedRequestOptions: changeFeedRequestOptions,
-                clientContext: this.ClientContext,
-                container: this,
-                changeFeedQuerySpec: changeFeedQuerySpec);
-
-            return new FeedIteratorCore<T>(
-                changeFeedIteratorCore,
-                responseCreator: this.ClientContext.ResponseFactory.CreateChangeFeedUserTypeResponse<T>);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Cosmos
         {
             using (HttpResponseMessage responseMessage = await this.InvokeClientAsync(request, resourceType, physicalAddress, cancellationToken))
             {
-                return await GatewayStoreClient.ParseResponseAsync(responseMessage, request.SerializerSettings ?? this.SerializerSettings, request);
+                return await GatewayStoreClient.ParseResponseAsync(responseMessage, this.SerializerSettings, request);
             }
         }
 
@@ -100,8 +100,7 @@ namespace Microsoft.Azure.Cosmos
                         body: contentStream,
                         headers: headers,
                         statusCode: responseMessage.StatusCode,
-                        clientSideRequestStatistics: requestStatistics,
-                        serializerSettings: serializerSettings);
+                        clientSideRequestStatistics: requestStatistics);
                 }
                 else if (request != null
                     && request.IsValidStatusCodeForExceptionlessRetry((int)responseMessage.StatusCode))
@@ -112,8 +111,7 @@ namespace Microsoft.Azure.Cosmos
                         body: contentStream,
                         headers: headers,
                         statusCode: responseMessage.StatusCode,
-                        clientSideRequestStatistics: requestStatistics,
-                        serializerSettings: serializerSettings);
+                        clientSideRequestStatistics: requestStatistics);
                 }
                 else
                 {
@@ -157,7 +155,7 @@ namespace Microsoft.Azure.Cosmos
                 try
                 {
                     Stream contentAsStream = await responseMessage.Content.ReadAsStreamAsync();
-                    Error error = JsonSerializable.LoadFrom<Error>(stream: contentAsStream);
+                    Error error = System.Text.Json.JsonSerializer.Deserialize<Error>(contentAsStream);
 
                     return new DocumentClientException(
                         errorResource: error,

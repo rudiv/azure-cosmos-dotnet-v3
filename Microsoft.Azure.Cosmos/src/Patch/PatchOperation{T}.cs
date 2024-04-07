@@ -15,7 +15,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Value parameter.
         /// </summary>
-        [JsonProperty(PropertyName = PatchConstants.PropertyNames.Value)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: PatchConstants.PropertyNames.Value)]
         public abstract T Value { get; }
     }
 }

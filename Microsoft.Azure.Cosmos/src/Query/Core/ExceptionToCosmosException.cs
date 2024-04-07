@@ -5,7 +5,6 @@
 namespace Microsoft.Azure.Cosmos.Query.Core
 {
     using System;
-    using Microsoft.Azure.Cosmos.ChangeFeed;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Resource.CosmosExceptions;
@@ -14,7 +13,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
     internal sealed class ExceptionToCosmosException
     {
         public static bool TryCreateFromException(
-            Exception exception, 
+            Exception exception,
             ITrace trace,
             out CosmosException cosmosException)
         {
@@ -33,12 +32,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core
             if (exception is QueryException queryException)
             {
                 cosmosException = queryException.Accept(QueryExceptionConverter.Singleton, trace);
-                return true;
-            }
-
-            if (exception is ChangeFeedException changeFeedException)
-            {
-                cosmosException = changeFeedException.Accept(ChangeFeedExceptionConverter.Singleton, trace);
                 return true;
             }
 
@@ -79,9 +72,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core
             Exception innerException = ExceptionWithStackTraceException.UnWrapMonadExcepion(exceptionWithStackTrace, trace);
 
             if (!ExceptionToCosmosException.TryCreateFromException(
-                innerException,
-                trace,
-                out cosmosException))
+                    innerException,
+                    trace,
+                    out cosmosException))
             {
                 return false;
             }
@@ -111,10 +104,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
 
             public override CosmosException Visit(MalformedContinuationTokenException malformedContinuationTokenException, ITrace trace)
             {
-                Headers headers = new Headers()
-                {
-                    SubStatusCode = Documents.SubStatusCodes.MalformedContinuationToken
-                }; 
+                Headers headers = new Headers() { SubStatusCode = Documents.SubStatusCodes.MalformedContinuationToken };
                 return CosmosExceptionFactory.CreateBadRequestException(
                     message: malformedContinuationTokenException.Message,
                     headers: headers,
@@ -139,27 +129,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core
                     headers: new Headers(),
                     stackTrace: expectedQueryPartitionProviderException.StackTrace,
                     innerException: expectedQueryPartitionProviderException,
-                    trace: trace);
-            }
-        }
-
-        private sealed class ChangeFeedExceptionConverter : ChangeFeedExceptionVisitor<CosmosException>
-        {
-            public static readonly ChangeFeedExceptionConverter Singleton = new ChangeFeedExceptionConverter();
-
-            private ChangeFeedExceptionConverter()
-            {
-            }
-
-            internal override CosmosException Visit(
-                MalformedChangeFeedContinuationTokenException malformedChangeFeedContinuationTokenException,
-                ITrace trace)
-            {
-                return CosmosExceptionFactory.CreateBadRequestException(
-                    message: malformedChangeFeedContinuationTokenException.Message,
-                    headers: new Headers(),
-                    stackTrace: malformedChangeFeedContinuationTokenException.StackTrace,
-                    innerException: malformedChangeFeedContinuationTokenException,
                     trace: trace);
             }
         }

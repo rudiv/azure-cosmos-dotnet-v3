@@ -86,12 +86,6 @@ namespace Microsoft.Azure.Cosmos.Telemetry
         internal static readonly TimeSpan NetworkLatencyThreshold = TimeSpan.FromMilliseconds(5);
         internal static readonly int NetworkRequestsSampleSizeThreshold = 10;
         
-        internal static readonly JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings 
-        { 
-            NullValueHandling = NullValueHandling.Ignore,
-            MaxDepth = 64, // https://github.com/advisories/GHSA-5crp-9r3c-p9vr
-        };
-        
         internal static readonly List<int> ExcludedStatusCodes = new List<int> { 404, 409, 412 };
 
         internal static readonly int NetworkTelemetrySampleSize = 200;

@@ -50,7 +50,7 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// True, if automatic indexing is enabled; otherwise, false.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.Automatic)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Automatic)]
         public bool Automatic { get; set; }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// One of the values of the <see cref="T:Microsoft.Azure.Cosmos.IndexingMode"/> enumeration.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.IndexingMode)]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.IndexingMode)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public IndexingMode IndexingMode { get; set; }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// The collection containing <see cref="IncludedPath"/> objects.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.IncludedPaths)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.IncludedPaths)]
         public Collection<IncludedPath> IncludedPaths { get; internal set; } = new Collection<IncludedPath>();
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// The collection containing <see cref="ExcludedPath"/> objects.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.ExcludedPaths)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ExcludedPaths)]
         public Collection<ExcludedPath> ExcludedPaths { get; internal set; } = new Collection<ExcludedPath>();
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Microsoft.Azure.Cosmos
         ///   ]
         /// ]]>
         /// </example>
-        [JsonProperty(PropertyName = Constants.Properties.CompositeIndexes)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.CompositeIndexes)]
         public Collection<Collection<CompositePath>> CompositeIndexes { get; internal set; } = new Collection<Collection<CompositePath>>();
 
         /// <summary>
@@ -141,13 +141,14 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Collection of spatial index definitions to be used
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.SpatialIndexes)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.SpatialIndexes)]
         public Collection<SpatialPath> SpatialIndexes { get; internal set; } = new Collection<SpatialPath>();
 
         /// <summary>
         /// Gets or Sets an internal placeholder collection to hold the vector indexes.
         /// </summary>
-        [JsonProperty(PropertyName = "vectorIndexes", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "vectorIndexes")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         internal Collection<VectorIndexPath> VectorIndexesInternal { get; set; }
 
         /// <summary>
@@ -161,7 +162,8 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Indexing policy annotation.
         /// </summary>
-        [JsonProperty(PropertyName = "annotation", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "annotation")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Annotation { get; set; }
 #endif
 

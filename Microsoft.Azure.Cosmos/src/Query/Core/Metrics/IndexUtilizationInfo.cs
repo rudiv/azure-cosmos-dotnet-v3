@@ -76,14 +76,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             {
                 string decodedString = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(delimitedString));
 
-                result = JsonConvert.DeserializeObject<IndexUtilizationInfo>(decodedString, new JsonSerializerSettings()
-                {
-                    // Allowing null values to be resilient to Json structure change
-                    MissingMemberHandling = MissingMemberHandling.Ignore,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    // Ignore parsing error encountered in desrialization
-                    Error = (sender, parsingErrorEvent) => parsingErrorEvent.ErrorContext.Handled = true
-                }) ?? IndexUtilizationInfo.Empty;
+                result = IndexUtilizationInfo.Empty;
 
                 return true;
             }

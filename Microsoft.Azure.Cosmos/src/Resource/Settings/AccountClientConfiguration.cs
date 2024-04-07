@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Cosmos
 
     internal class AccountClientConfiguration
     {
-        [JsonProperty(PropertyName = Constants.Properties.ClientTelemetryConfiguration)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ClientTelemetryConfiguration)]
         public ClientTelemetryConfiguration ClientTelemetryConfiguration { get; set; }
 
         /// <summary>

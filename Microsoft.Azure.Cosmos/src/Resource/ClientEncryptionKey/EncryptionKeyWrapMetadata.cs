@@ -49,7 +49,8 @@ namespace Microsoft.Azure.Cosmos
         /// Note: This value is saved in the Cosmos DB service.
         /// Implementors of derived implementations should ensure that this does not have (private) key material or credential information.
         /// </summary>
-        [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "type")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Type { get; private set; }
 
         /// <summary>
@@ -57,7 +58,8 @@ namespace Microsoft.Azure.Cosmos
         /// Note: This value is saved in the Cosmos DB service.
         /// Implementors of derived implementations should ensure that this does not have (private) key material or credential information.
         /// </summary>
-        [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "name")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Name { get; private set; }
 
         /// <summary>
@@ -65,7 +67,8 @@ namespace Microsoft.Azure.Cosmos
         /// Note: This value is saved in the Cosmos DB service.
         /// Implementors of derived implementations should ensure that this does not have (private) key material or credential information.
         /// </summary>
-        [JsonProperty(PropertyName = "value", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "value")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Value { get; private set; }
 
         /// <summary>
@@ -73,7 +76,8 @@ namespace Microsoft.Azure.Cosmos
         /// Note: This value is saved in the Cosmos DB service.
         /// Implementors of derived implementations should ensure that this does not have (private) key material or credential information.
         /// </summary>
-        [JsonProperty(PropertyName = "algorithm", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "algorithm")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string Algorithm { get; private set; }
 
         /// <summary>

@@ -10,7 +10,6 @@ namespace Microsoft.Azure.Cosmos
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.ChangeFeed;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
     using Microsoft.Azure.Cosmos.ReadFeed;
@@ -495,72 +494,6 @@ namespace Microsoft.Azure.Cosmos
                 this.ClientContext);
         }
 
-        public override IOrderedQueryable<T> GetItemLinqQueryable<T>(bool allowSynchronousQueryExecution = false,
-            string continuationToken = null,
-            QueryRequestOptions requestOptions = null,
-            CosmosLinqSerializerOptions linqSerializerOptions = null)
-        {
-            return base.GetItemLinqQueryable<T>(
-                allowSynchronousQueryExecution,
-                continuationToken,
-                requestOptions,
-                linqSerializerOptions);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilder<T>(
-            string processorName,
-            ChangesHandler<T> onChangesDelegate)
-        {
-            return base.GetChangeFeedProcessorBuilder<T>(processorName, onChangesDelegate);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilder<T>(
-            string processorName,
-            ChangeFeedHandler<T> onChangesDelegate)
-        {
-            return base.GetChangeFeedProcessorBuilder<T>(processorName, onChangesDelegate);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilderWithManualCheckpoint<T>(
-            string processorName,
-            ChangeFeedHandlerWithManualCheckpoint<T> onChangesDelegate)
-        {
-            return base.GetChangeFeedProcessorBuilderWithManualCheckpoint<T>(processorName, onChangesDelegate);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilder(
-            string processorName,
-            ChangeFeedStreamHandler onChangesDelegate)
-        {
-            return base.GetChangeFeedProcessorBuilder(processorName, onChangesDelegate);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedProcessorBuilderWithManualCheckpoint(
-            string processorName,
-            ChangeFeedStreamHandlerWithManualCheckpoint onChangesDelegate)
-        {
-            return base.GetChangeFeedProcessorBuilderWithManualCheckpoint(processorName, onChangesDelegate);
-        }
-
-        public override ChangeFeedProcessorBuilder GetChangeFeedEstimatorBuilder(string processorName,
-            ChangesEstimationHandler estimationDelegate,
-            TimeSpan? estimationPeriod = null)
-        {
-            return base.GetChangeFeedEstimatorBuilder(processorName, estimationDelegate, estimationPeriod);
-        }
-
-        public override ChangeFeedEstimator GetChangeFeedEstimator(
-            string processorName,
-            Container leaseContainer)
-        {
-            return base.GetChangeFeedEstimator(processorName, leaseContainer);
-        }
-
-        public override TransactionalBatch CreateTransactionalBatch(PartitionKey partitionKey)
-        {
-            return base.CreateTransactionalBatch(partitionKey);
-        }
-
         public override Task<IReadOnlyList<FeedRange>> GetFeedRangesAsync(CancellationToken cancellationToken = default)
         {
             return this.ClientContext.OperationHelperAsync(
@@ -570,25 +503,6 @@ namespace Microsoft.Azure.Cosmos
                 operationType: Documents.OperationType.ReadFeed,
                 requestOptions: null,
                 task: (trace) => base.GetFeedRangesAsync(trace, cancellationToken));
-        }
-
-        public override FeedIterator GetChangeFeedStreamIterator(
-            ChangeFeedStartFrom changeFeedStartFrom,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedRequestOptions changeFeedRequestOptions = null)
-        {
-            return base.GetChangeFeedStreamIterator(changeFeedStartFrom, changeFeedMode, changeFeedRequestOptions);
-        }
-
-        public override FeedIterator<T> GetChangeFeedIterator<T>(
-            ChangeFeedStartFrom changeFeedStartFrom,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedRequestOptions changeFeedRequestOptions = null)
-        {
-            return new FeedIteratorInlineCore<T>(base.GetChangeFeedIterator<T>(changeFeedStartFrom, 
-                                                 changeFeedMode, 
-                                                 changeFeedRequestOptions),
-                                                 this.ClientContext);
         }
 
         public override Task<IEnumerable<string>> GetPartitionKeyRangesAsync(
@@ -629,14 +543,6 @@ namespace Microsoft.Azure.Cosmos
         public override FeedIteratorInternal GetReadFeedIterator(QueryDefinition queryDefinition, QueryRequestOptions queryRequestOptions, string resourceLink, Documents.ResourceType resourceType, string continuationToken, int pageSize)
         {
             return base.GetReadFeedIterator(queryDefinition, queryRequestOptions, resourceLink, resourceType, continuationToken, pageSize);
-        }
-
-        public override IAsyncEnumerable<TryCatch<ChangeFeedPage>> GetChangeFeedAsyncEnumerable(
-            ChangeFeedCrossFeedRangeState state,
-            ChangeFeedMode changeFeedMode,
-            ChangeFeedRequestOptions changeFeedRequestOptions = default)
-        {
-            return base.GetChangeFeedAsyncEnumerable(state, changeFeedMode, changeFeedRequestOptions);
         }
 
         public override IAsyncEnumerable<TryCatch<ReadFeedPage>> GetReadFeedAsyncEnumerable(

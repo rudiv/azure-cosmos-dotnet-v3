@@ -17,9 +17,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
 #pragma warning disable SA1601 // Partial elements should be documented
     public
 #else
-    internal
-#endif
-    abstract partial class CosmosFloat32 : CosmosNumber, IEquatable<CosmosFloat32>, IComparable<CosmosFloat32>
+    #endif
+        public abstract partial class CosmosFloat32 : CosmosNumber, IEquatable<CosmosFloat32>, IComparable<CosmosFloat32>
     {
         protected CosmosFloat32()
             : base()
@@ -45,14 +44,14 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
             return cosmosNumberVisitor.Visit(this, input);
         }
 
-        public override bool Equals(CosmosNumber cosmosNumber)
+        public override bool Equals(CosmosNumber? cosmosNumber)
         {
             return cosmosNumber is CosmosFloat32 cosmosFloat32 && this.Equals(cosmosFloat32);
         }
 
-        public bool Equals(CosmosFloat32 cosmosFloat32)
+        public bool Equals(CosmosFloat32? cosmosFloat32)
         {
-            return this.GetValue() == cosmosFloat32.GetValue();
+            return this.GetValue() == cosmosFloat32?.GetValue();
         }
 
         public override int GetHashCode()
@@ -60,9 +59,9 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
             return (int)MurmurHash3.Hash32(this.GetValue(), 495253708);
         }
 
-        public int CompareTo(CosmosFloat32 cosmosFloat32)
+        public int CompareTo(CosmosFloat32? cosmosFloat32)
         {
-            return this.GetValue().CompareTo(cosmosFloat32.GetValue());
+            return this.GetValue().CompareTo(cosmosFloat32?.GetValue());
         }
 
         public override void WriteTo(IJsonWriter jsonWriter)

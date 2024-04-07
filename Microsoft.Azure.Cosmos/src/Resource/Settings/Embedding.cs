@@ -19,27 +19,27 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets or sets a string containing the path of the vector index.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.Path)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Path)]
         public string Path { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Cosmos.VectorDataType"/> representing the corresponding vector data type.
         /// </summary>
-        [JsonProperty(PropertyName = "dataType")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "dataType")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public VectorDataType DataType { get; set; }
 
         /// <summary>
         /// Gets or sets a long integer representing the dimensions of a vector. 
         /// </summary>
-        [JsonProperty(PropertyName = "dimensions")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "dimensions")]
         public ulong Dimensions { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Cosmos.DistanceFunction"/> which is used to calculate the respective distance between the vectors. 
         /// </summary>
-        [JsonProperty(PropertyName = "distanceFunction")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "distanceFunction")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public DistanceFunction DistanceFunction { get; set; }
 
         /// <summary>

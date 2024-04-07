@@ -28,22 +28,22 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Get or set the default consistency level in the Azure Cosmos DB service.
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        [JsonProperty(PropertyName = Constants.Properties.DefaultConsistencyLevel)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.DefaultConsistencyLevel)]
         public ConsistencyLevel DefaultConsistencyLevel { get; internal set; }
 
         /// <summary>
         /// For bounded staleness consistency, the maximum allowed staleness
         /// in terms difference in sequence numbers (aka version) in the Azure Cosmos DB service.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.MaxStalenessPrefix)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.MaxStalenessPrefix)]
         public int MaxStalenessPrefix { get; internal set; }
 
         /// <summary>
         /// For bounded staleness consistency, the maximum allowed staleness
         /// in terms time interval in the Azure Cosmos DB service.
         /// </summary>
-        [JsonProperty(PropertyName = Constants.Properties.MaxStalenessIntervalInSeconds)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.MaxStalenessIntervalInSeconds)]
         public int MaxStalenessIntervalInSeconds { get; internal set; }
 
         /// <summary>

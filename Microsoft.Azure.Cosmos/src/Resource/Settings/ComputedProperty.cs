@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Cosmos
         /// <remarks>
         /// Name of the computed property should be chosen such that it does not collide with any existing or future document properties.
         /// </remarks>
-        [JsonProperty(PropertyName = "name")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos
         /// For example:
         /// SELECT VALUE LOWER(c.firstName) FROM c
         /// </remarks>
-        [JsonProperty(PropertyName = "query")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "query")]
         public string Query { get; set; }
 
         /// <summary>

@@ -13,34 +13,34 @@ namespace Microsoft.Azure.Cosmos.Telemetry.Models
     [Serializable]
     internal class OperationInfo
     {
-        [JsonProperty(PropertyName = "regionsContacted")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "regionsContacted")]
         internal string RegionsContacted { get; }
 
-        [JsonProperty(PropertyName = "greaterThan1Kb")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "greaterThan1Kb")]
         internal bool? GreaterThan1Kb { get; set; }
 
-        [JsonProperty(PropertyName = "databaseName")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "databaseName")]
         internal string DatabaseName { get; }
 
-        [JsonProperty(PropertyName = "containerName")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "containerName")]
         internal string ContainerName { get; }
 
-        [JsonProperty(PropertyName = "operation")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "operation")]
         internal string Operation { get; }
 
-        [JsonProperty(PropertyName = "resource")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "resource")]
         internal string Resource { get; }
 
-        [JsonProperty(PropertyName = "consistency")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "consistency")]
         internal string Consistency { get; }
 
-        [JsonProperty(PropertyName = "statusCode")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "statusCode")]
         public int? StatusCode { get; }
 
-        [JsonProperty(PropertyName = "subStatusCode")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "subStatusCode")]
         public int SubStatusCode { get; }
 
-        [JsonProperty(PropertyName = "metricInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "metricInfo")]
         internal MetricInfo MetricInfo { get; set; }
 
         internal OperationInfo(string metricsName, string unitName)

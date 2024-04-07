@@ -14,9 +14,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1601 // Partial elements should be documented
     public
 #else
-    internal
-#endif
-    abstract partial class CosmosString : CosmosElement, IEquatable<CosmosString>, IComparable<CosmosString>
+    #endif
+        public abstract partial class CosmosString : CosmosElement, IEquatable<CosmosString>, IComparable<CosmosString>
     {
         private sealed class EagerCosmosString : CosmosString
         {

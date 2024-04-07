@@ -14,9 +14,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1600 // Elements should be documented
     public
 #else
-    internal
-#endif
-    abstract class CosmosNumber : CosmosElement, IEquatable<CosmosNumber>, IComparable<CosmosNumber>
+    #endif
+        public abstract class CosmosNumber : CosmosElement, IEquatable<CosmosNumber>, IComparable<CosmosNumber>
     {
         protected CosmosNumber()
             : base()
@@ -46,17 +45,17 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return cosmosElementVisitor.Visit(this, input);
         }
 
-        public override bool Equals(CosmosElement cosmosElement)
+        public override bool Equals(CosmosElement? cosmosElement)
         {
             return cosmosElement is CosmosNumber cosmosNumber && this.Equals(cosmosNumber);
         }
 
-        public abstract bool Equals(CosmosNumber cosmosNumber);
+        public abstract bool Equals(CosmosNumber? cosmosNumber);
 
-        public int CompareTo(CosmosNumber other)
+        public int CompareTo(CosmosNumber? other)
         {
             int thisTypeOrder = this.Accept(CosmosNumberToTypeOrder.Singleton);
-            int otherTypeOrder = other.Accept(CosmosNumberToTypeOrder.Singleton);
+            int otherTypeOrder = other!.Accept(CosmosNumberToTypeOrder.Singleton);
 
             if (thisTypeOrder != otherTypeOrder)
             {

@@ -38,12 +38,13 @@ namespace Microsoft.Azure.Cosmos.Routing
             else
             {
                 return PartitionKeyInternal.FromObjectArray(
-                    partitionKeyDefinition.Paths.Select(path =>
+                    partitionKeyDefinition.Paths.Select<string, object>(path =>
                     {
                         IReadOnlyList<string> parts = PathParser.GetPathParts(path);
                         Debug.Assert(parts.Count >= 1, "Partition key component definition path is invalid.");
 
-                        return document.GetValueByPath<object>(parts.ToArray(), Undefined.Value);
+                        // TODO This deffo needs fixing
+                        return null;// document.GetValueByPath<object>(parts.ToArray(), Undefined.Value);
                     }).ToArray(),
                     false);
             }

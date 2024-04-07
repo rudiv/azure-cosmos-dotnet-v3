@@ -18,9 +18,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1601 // Partial elements should be documented
     public
 #else
-    internal
-#endif
-    abstract partial class CosmosObject : CosmosElement, IReadOnlyDictionary<string, CosmosElement>, IEquatable<CosmosObject>, IComparable<CosmosObject>
+    #endif
+        public abstract partial class CosmosObject : CosmosElement, IReadOnlyDictionary<string, CosmosElement>, IEquatable<CosmosObject>, IComparable<CosmosObject>
     {
         private const uint HashSeed = 1275696788;
         private const uint NameHashSeed = 263659187;
@@ -90,14 +89,14 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         IEnumerator<KeyValuePair<string, CosmosElement>> IEnumerable<KeyValuePair<string, CosmosElement>>.GetEnumerator() => this.GetEnumerator();
 
-        public override bool Equals(CosmosElement cosmosElement)
+        public override bool Equals(CosmosElement? cosmosElement)
         {
             return cosmosElement is CosmosObject cosmosObject && this.Equals(cosmosObject);
         }
 
-        public bool Equals(CosmosObject cosmosObject)
+        public bool Equals(CosmosObject? cosmosObject)
         {
-            if (this.Count != cosmosObject.Count)
+            if (this.Count != cosmosObject?.Count)
             {
                 return false;
             }
@@ -143,7 +142,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return (int)hash;
         }
 
-        public int CompareTo(CosmosObject cosmosObject)
+        public int CompareTo(CosmosObject? cosmosObject)
         {
             UInt128 hash1 = DistinctHash.GetHash(this);
             UInt128 hash2 = DistinctHash.GetHash(cosmosObject);

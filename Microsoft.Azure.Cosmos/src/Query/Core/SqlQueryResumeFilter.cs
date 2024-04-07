@@ -7,17 +7,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core
     using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
+    using System.Text.Json.Serialization;
 
-    [DataContract]
-    internal sealed class SqlQueryResumeFilter
+    public sealed class SqlQueryResumeFilter
     {
-        [DataMember(Name = "value")]
+        [JsonPropertyName("value")]
         public IReadOnlyList<SqlQueryResumeValue> ResumeValues { get; }
 
-        [DataMember(Name = "rid", EmitDefaultValue = false)]
+        [JsonPropertyName("rid")]
         public string Rid { get; }
 
-        [DataMember(Name = "exclude")]
+        [JsonPropertyName("exclude")]
         public bool Exclude { get; }
 
         public SqlQueryResumeFilter(

@@ -78,7 +78,9 @@ namespace Microsoft.Azure.Cosmos
             string jsonText = Utf8StringHelpers.ToString(buffer);
 
             IEnumerable<T> typedResults;
+            throw new NotImplementedException();
 
+            /*
             // If the resource type is an offer and the requested type is either a Offer or OfferV2 or dynamic
             // create a OfferV2 object and cast it to T. This is a temporary fix until offers is moved to v3 API. 
             if (resourceType == ResourceType.Offer &&
@@ -99,7 +101,7 @@ namespace Microsoft.Azure.Cosmos
                 dynamicFeed.QueryMetrics,
                 dynamicFeed.RequestStatistics,
                 dynamicFeed.DisallowContinuationTokenMessage,
-                dynamicFeed.ResponseLengthBytes);
+                dynamicFeed.ResponseLengthBytes);*/
         }
     }
 }

@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Cosmos.Routing
             this.unavailableLocationsExpirationTime = TimeSpan.FromSeconds(LocationCache.DefaultUnavailableLocationsExpirationTimeInSeconds);
             this.regionNameMapper = new RegionNameMapper();
 
-#if !(NETSTANDARD15 || NETSTANDARD16)
+#if !(NETSTANDARD15 || NETSTANDARD16) && !NATIVE
 #if NETSTANDARD20
             // GetEntryAssembly returns null when loaded from native netstandard2.0
             if (System.Reflection.Assembly.GetEntryAssembly() != null)

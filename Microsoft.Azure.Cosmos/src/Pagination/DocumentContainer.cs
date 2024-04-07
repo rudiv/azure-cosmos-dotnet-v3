@@ -8,7 +8,6 @@ namespace Microsoft.Azure.Cosmos.Pagination
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.ChangeFeed.Pagination;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
@@ -180,27 +179,6 @@ namespace Microsoft.Azure.Cosmos.Pagination
                     cancellationToken),
                 cancellationToken);
 
-        public Task<ChangeFeedPage> ChangeFeedAsync(
-            FeedRangeState<ChangeFeedState> feedRangeState,
-            ChangeFeedPaginationOptions changeFeedPaginationOptions,
-            ITrace trace,
-            CancellationToken cancellationToken) => TryCatch<ChangeFeedPage>.UnsafeGetResultAsync(
-                this.MonadicChangeFeedAsync(
-                    feedRangeState,
-                    changeFeedPaginationOptions,
-                    trace,
-                    cancellationToken), 
-                cancellationToken);
-
-        public Task<TryCatch<ChangeFeedPage>> MonadicChangeFeedAsync(
-            FeedRangeState<ChangeFeedState> state,
-            ChangeFeedPaginationOptions changeFeedPaginationOptions,
-            ITrace trace,
-            CancellationToken cancellationToken) => this.monadicDocumentContainer.MonadicChangeFeedAsync(
-                state,
-                changeFeedPaginationOptions,
-                trace,
-                cancellationToken);
 
         public Task<string> GetResourceIdentifierAsync(
             ITrace trace,

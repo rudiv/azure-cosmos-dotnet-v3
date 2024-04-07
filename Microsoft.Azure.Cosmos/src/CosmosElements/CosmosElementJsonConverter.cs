@@ -13,7 +13,6 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
     using System.Reflection;
 #endif
     using System.Text;
-    using Microsoft.Azure.Cosmos.Json.Interop;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -94,6 +93,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
+            throw new NotImplementedException();
+            /*
             NewtonsoftToCosmosDBWriter writerInterop = NewtonsoftToCosmosDBWriter.CreateFromWriter(writer);
 
             if (!(value is CosmosElement cosmosElement))
@@ -101,7 +102,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
                 throw new InvalidCastException($"Failed to cast to {nameof(CosmosElement)}.");
             }
 
-            cosmosElement.WriteTo(writerInterop);
+            cosmosElement.WriteTo(writerInterop);*/
         }
     }
 #if INTERNAL

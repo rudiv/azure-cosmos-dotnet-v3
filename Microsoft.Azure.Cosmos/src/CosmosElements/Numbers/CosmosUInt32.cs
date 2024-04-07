@@ -17,9 +17,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
 #pragma warning disable SA1601 // Partial elements should be documented
     public
 #else
-    internal
-#endif
-    abstract partial class CosmosUInt32 : CosmosNumber, IEquatable<CosmosUInt32>, IComparable<CosmosUInt32>
+    #endif
+        public abstract partial class CosmosUInt32 : CosmosNumber, IEquatable<CosmosUInt32>, IComparable<CosmosUInt32>
     {
         protected CosmosUInt32()
             : base()
@@ -45,14 +44,14 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
             return cosmosNumberVisitor.Visit(this, input);
         }
 
-        public override bool Equals(CosmosNumber cosmosNumber)
+        public override bool Equals(CosmosNumber? cosmosNumber)
         {
             return cosmosNumber is CosmosUInt32 cosmosUInt32 && this.Equals(cosmosUInt32);
         }
 
-        public bool Equals(CosmosUInt32 cosmosUInt32)
+        public bool Equals(CosmosUInt32? cosmosUInt32)
         {
-            return this.GetValue() == cosmosUInt32.GetValue();
+            return this.GetValue() == cosmosUInt32?.GetValue();
         }
 
         public override int GetHashCode()
@@ -60,9 +59,9 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
             return (int)MurmurHash3.Hash32(this.GetValue(), 3771427877);
         }
 
-        public int CompareTo(CosmosUInt32 cosmosUInt32)
+        public int CompareTo(CosmosUInt32? cosmosUInt32)
         {
-            return this.GetValue().CompareTo(cosmosUInt32.GetValue());
+            return this.GetValue().CompareTo(cosmosUInt32?.GetValue());
         }
 
         public override void WriteTo(IJsonWriter jsonWriter)

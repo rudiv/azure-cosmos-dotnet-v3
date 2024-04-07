@@ -12,55 +12,55 @@ namespace Microsoft.Azure.Cosmos.Telemetry.Models
     [Serializable]
     internal sealed class ClientTelemetryProperties
     {
-        [JsonProperty(PropertyName = "timeStamp")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "timeStamp")]
         internal string DateTimeUtc { get; set; }
 
-        [JsonProperty(PropertyName = "clientId")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "clientId")]
         internal string ClientId { get; }
 
-        [JsonProperty(PropertyName = "machineId")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "machineId")]
         internal string MachineId { get; set; }
 
-        [JsonProperty(PropertyName = "processId")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "processId")]
         internal string ProcessId { get; }
 
-        [JsonProperty(PropertyName = "userAgent")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "userAgent")]
         internal string UserAgent { get; }
 
-        [JsonProperty(PropertyName = "connectionMode")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "connectionMode")]
         internal string ConnectionMode { get; }
 
-        [JsonProperty(PropertyName = "globalDatabaseAccountName")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "globalDatabaseAccountName")]
         internal string GlobalDatabaseAccountName { get; set; }
 
-        [JsonProperty(PropertyName = "applicationRegion")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "applicationRegion")]
         internal string ApplicationRegion { get; set; }
 
-        [JsonProperty(PropertyName = "hostEnvInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "hostEnvInfo")]
         internal string HostEnvInfo { get; set; }
 
-        [JsonProperty(PropertyName = "acceleratedNetworking")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "acceleratedNetworking")]
         internal bool? AcceleratedNetworking { get; set; }
 
         /// <summary>
         /// Preferred Region set by the client
         /// </summary>
-        [JsonProperty(PropertyName = "preferredRegions")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "preferredRegions")]
         internal IReadOnlyList<string> PreferredRegions { get; set; }
 
-        [JsonProperty(PropertyName = "aggregationIntervalInSec")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "aggregationIntervalInSec")]
         internal int AggregationIntervalInSec { get; set; }
 
-        [JsonProperty(PropertyName = "systemInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "systemInfo")]
         internal List<SystemInfo> SystemInfo { get; set; }
 
-        [JsonProperty(PropertyName = "cacheRefreshInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "cacheRefreshInfo")]
         internal List<CacheRefreshInfo> CacheRefreshInfo { get; set; }
 
-        [JsonProperty(PropertyName = "operationInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "operationInfo")]
         internal List<OperationInfo> OperationInfo { get; set; }
 
-        [JsonProperty(PropertyName = "requestInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "requestInfo")]
         internal List<RequestInfo> RequestInfo { get; set; }
 
         [JsonIgnore]

@@ -15,9 +15,8 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 #pragma warning disable SA1601 // Partial elements should be documented
     public
 #else
-    internal
-#endif
-    abstract partial class CosmosGuid : CosmosElement, IEquatable<CosmosGuid>, IComparable<CosmosGuid>
+    #endif
+        public abstract partial class CosmosGuid : CosmosElement, IEquatable<CosmosGuid>, IComparable<CosmosGuid>
     {
         private const uint HashSeed = 527095639;
 
@@ -43,14 +42,14 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return cosmosElementVisitor.Visit(this, input);
         }
 
-        public override bool Equals(CosmosElement cosmosElement)
+        public override bool Equals(CosmosElement? cosmosElement)
         {
             return cosmosElement is CosmosGuid cosmosGuid && this.Equals(cosmosGuid);
         }
 
-        public bool Equals(CosmosGuid cosmosGuid)
+        public bool Equals(CosmosGuid? cosmosGuid)
         {
-            return this.Value == cosmosGuid.Value;
+            return this.Value == cosmosGuid?.Value;
         }
 
         public override int GetHashCode()
@@ -60,9 +59,9 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             return (int)hash;
         }
 
-        public int CompareTo(CosmosGuid cosmosGuid)
+        public int CompareTo(CosmosGuid? cosmosGuid)
         {
-            return this.Value.CompareTo(cosmosGuid.Value);
+            return this.Value.CompareTo(cosmosGuid?.Value);
         }
 
         public static CosmosGuid Create(

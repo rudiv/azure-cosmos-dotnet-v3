@@ -62,14 +62,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 // Decode and deserialize the response string
                 string decodedString = System.Web.HttpUtility.UrlDecode(delimitedString, Encoding.UTF8);
 
-                result = JsonConvert.DeserializeObject<IndexMetricsInfo>(decodedString, new JsonSerializerSettings()
-                    {
-                        // Allowing null values to be resilient to Json structure change
-                        MissingMemberHandling = MissingMemberHandling.Ignore,
-                        NullValueHandling = NullValueHandling.Ignore,
-                        // Ignore parsing error encountered in deserialization
-                        Error = (sender, parsingErrorEvent) => parsingErrorEvent.ErrorContext.Handled = true
-                    }) ?? null;
+                result = null;
 
                 return true;
             }

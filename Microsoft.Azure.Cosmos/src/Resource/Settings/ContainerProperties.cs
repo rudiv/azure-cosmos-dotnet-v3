@@ -7,9 +7,10 @@ namespace Microsoft.Azure.Cosmos
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Routing;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -57,42 +58,59 @@ namespace Microsoft.Azure.Cosmos
     /// <seealso cref="Microsoft.Azure.Cosmos.UniqueKeyPolicy"/>
     public class ContainerProperties
     {
-        private static readonly char[] partitionKeyTokenDelimeter = new char[] { '/' };
+        internal static readonly char[] partitionKeyTokenDelimeter = new char[] { '/' };
 
-        [JsonProperty(PropertyName = Constants.Properties.ChangeFeedPolicy, NullValueHandling = NullValueHandling.Ignore)]
-        private ChangeFeedPolicy changeFeedPolicyInternal;
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ChangeFeedPolicy)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal ChangeFeedPolicy changeFeedPolicyInternal;
 
-        [JsonProperty(PropertyName = Constants.Properties.IndexingPolicy, NullValueHandling = NullValueHandling.Ignore)]
-        private IndexingPolicy indexingPolicyInternal;
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.IndexingPolicy)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal IndexingPolicy indexingPolicyInternal;
 
         // TODO: update spatial properties to Constants.Properties.* after the new direct package is released
-        [JsonProperty(PropertyName = "geospatialConfig", NullValueHandling = NullValueHandling.Ignore)]
-        private GeospatialConfig geospatialConfigInternal;
+        [System.Text.Json.Serialization.JsonPropertyName(name: "geospatialConfig")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal GeospatialConfig geospatialConfigInternal;
 
-        [JsonProperty(PropertyName = Constants.Properties.UniqueKeyPolicy, NullValueHandling = NullValueHandling.Ignore)]
-        private UniqueKeyPolicy uniqueKeyPolicyInternal;
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.UniqueKeyPolicy)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal UniqueKeyPolicy uniqueKeyPolicyInternal;
 
-        [JsonProperty(PropertyName = Constants.Properties.ConflictResolutionPolicy, NullValueHandling = NullValueHandling.Ignore)]
-        private ConflictResolutionPolicy conflictResolutionInternal;
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ConflictResolutionPolicy)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal ConflictResolutionPolicy conflictResolutionInternal;
 
-        [JsonProperty(PropertyName = "clientEncryptionPolicy", NullValueHandling = NullValueHandling.Ignore)]
-        private ClientEncryptionPolicy clientEncryptionPolicyInternal;
+        [System.Text.Json.Serialization.JsonPropertyName(name: "clientEncryptionPolicy")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal ClientEncryptionPolicy clientEncryptionPolicyInternal;
 
-        [JsonProperty(PropertyName = "vectorEmbeddingPolicy", NullValueHandling = NullValueHandling.Ignore)]
-        private VectorEmbeddingPolicy vectorEmbeddingPolicyInternal;
+        [System.Text.Json.Serialization.JsonPropertyName(name: "vectorEmbeddingPolicy")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal VectorEmbeddingPolicy vectorEmbeddingPolicyInternal;
 
-        [JsonProperty(PropertyName = "computedProperties", NullValueHandling = NullValueHandling.Ignore)]
-        private Collection<ComputedProperty> computedProperties;
+        [System.Text.Json.Serialization.JsonPropertyName(name: "computedProperties")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal Collection<ComputedProperty> computedProperties;
 
         /// <summary>
         /// This contains additional values for scenarios where the SDK is not aware of new fields. 
         /// This ensures that if resource is read and updated none of the fields will be lost in the process.
         /// </summary>
         [JsonExtensionData]
-        internal IDictionary<string, JToken> AdditionalProperties { get; private set; }
+        [JsonInclude]
+        internal IDictionary<string, JsonElement> AdditionalProperties { get; set; }
 
-        private IReadOnlyList<IReadOnlyList<string>> partitionKeyPathTokens;
-        private string id;
+        internal IReadOnlyList<IReadOnlyList<string>> partitionKeyPathTokens;
+        internal string id;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContainerProperties"/> class for the Azure Cosmos DB service.
@@ -188,7 +206,7 @@ namespace Microsoft.Azure.Cosmos
         ///  '/', '\\', '?', '#'
         /// </para>
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.Id)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.Id)]
         public string Id
         {
             get => this.id;
@@ -231,16 +249,18 @@ namespace Microsoft.Azure.Cosmos
         /// <remarks>
         /// ETags are used for concurrency checking when updating resources.
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.ETag, NullValueHandling = NullValueHandling.Ignore)]
-        public string ETag { get; private set; }
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.ETag)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string ETag { get; set; }
 
         /// <summary>
         /// Gets the last modified time stamp associated with <see cref="ContainerProperties" /> from the Azure Cosmos DB service.
         /// </summary>
         /// <value>The last modified time stamp associated with the resource.</value>
-        [JsonProperty(PropertyName = Constants.Properties.LastModified, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.LastModified)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         [JsonConverter(typeof(UnixDateTimeConverter))]
-        public DateTime? LastModified { get; private set; }
+        public DateTime? LastModified { get; set; }
 
         /// <summary>
         /// Gets or sets the client encryption policy information for storing items in a container from the Azure Cosmos service.
@@ -480,7 +500,8 @@ namespace Microsoft.Azure.Cosmos
 #if !INTERNAL
         [Obsolete]
 #endif
-        [JsonProperty(PropertyName = Constants.Properties.TimeToLivePropertyPath, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.TimeToLivePropertyPath)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public string TimeToLivePropertyPath { get; set; }
 
         /// <summary>
@@ -540,7 +561,8 @@ namespace Microsoft.Azure.Cosmos
         /// ]]>
         /// </code>
         /// </example>
-        [JsonProperty(PropertyName = Constants.Properties.DefaultTimeToLive, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.DefaultTimeToLive)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int? DefaultTimeToLive { get; set; }
 
         /// <summary>
@@ -599,7 +621,8 @@ namespace Microsoft.Azure.Cosmos
         /// ]]>
         /// </code>
         /// </example>
-        [JsonProperty(PropertyName = Constants.Properties.AnalyticalStorageTimeToLive, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.AnalyticalStorageTimeToLive)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int? AnalyticalStoreTimeToLiveInSeconds { get; set; }
 
         /// <summary>
@@ -610,8 +633,9 @@ namespace Microsoft.Azure.Cosmos
         /// A self-link is a static addressable Uri for each resource within a database account and follows the Azure Cosmos DB resource model.
         /// E.g. a self-link for a document could be dbs/db_resourceid/colls/coll_resourceid/documents/doc_resourceid
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.SelfLink, NullValueHandling = NullValueHandling.Ignore)]
-        public string SelfLink { get; private set; }
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.SelfLink)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string SelfLink { get; set; }
 
         /// <summary>
         /// The function selects the right partition key constant mapping for <see cref="PartitionKey.None"/>
@@ -670,7 +694,9 @@ namespace Microsoft.Azure.Cosmos
         /// <value>
         /// <see cref="PartitionKeyDefinition"/> object.
         /// </value>
-        [JsonProperty(PropertyName = Constants.Properties.PartitionKey, NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.PartitionKey)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
         internal PartitionKeyDefinition PartitionKey { get; set; } = new PartitionKeyDefinition();
 
         /// <summary>
@@ -684,9 +710,10 @@ namespace Microsoft.Azure.Cosmos
         /// resource whether that is a database, a container or a document.
         /// These resource ids are used when building up SelfLinks, a static addressable Uri for each resource within a database account.
         /// </remarks>
-        [JsonProperty(PropertyName = Constants.Properties.RId, NullValueHandling = NullValueHandling.Ignore)]
-
-        internal string ResourceId { get; private set; }
+        [System.Text.Json.Serialization.JsonPropertyName(name: Constants.Properties.RId)]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonInclude]
+        internal string ResourceId { get; set; }
 
         internal bool HasPartitionKey => this.PartitionKey != null;
 

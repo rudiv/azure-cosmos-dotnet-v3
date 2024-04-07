@@ -58,19 +58,21 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// The full fidelity change feed current item.
         /// </summary>
-        [JsonProperty(PropertyName = "current")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "current")]
         public T Current { get; set; }
 
         /// <summary>
         /// The full fidelity change feed metadata.
         /// </summary>
-        [JsonProperty(PropertyName = "metadata", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "metadata")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public ChangeFeedMetadata Metadata { get; set; }
 
         /// <summary>
         /// For delete operations, previous image is always going to be provided. The previous image on replace operations is not going to be exposed by default and requires account-level or container-level opt-in.
         /// </summary>
-        [JsonProperty(PropertyName = "previous", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "previous")]
+[System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public T Previous { get; set; }
     }
 }

@@ -18,9 +18,8 @@ namespace Microsoft.Azure.Cosmos
 #pragma warning disable SA1600 // Elements should be documented
     public
 #else
-    internal
-#endif
-    readonly struct Number64 : IComparable<Number64>, IEquatable<Number64>
+    #endif
+        public readonly struct Number64 : IComparable<Number64>, IEquatable<Number64>
     {
         /// <summary>
         /// Maximum Number64.

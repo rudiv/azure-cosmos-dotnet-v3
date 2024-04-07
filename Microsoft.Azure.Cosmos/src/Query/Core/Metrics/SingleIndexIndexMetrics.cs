@@ -35,13 +35,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <summary>
         /// String representation of index paths of a composite index.
         /// </summary>
-        [JsonProperty(PropertyName = "IndexSpec")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "IndexSpec")]
         public string IndexDocumentExpression { get; }
 
         /// <summary>
         /// The index impact score of the single index.
         /// </summary>
-        [JsonProperty(PropertyName = "IndexImpactScore")]
+        [System.Text.Json.Serialization.JsonPropertyName(name: "IndexImpactScore")]
         public string IndexImpactScore { get; }
     }
 }
